@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: Plausible API
+  description: Plausible API allows you to record pageviews or custom events.
+  version: 1.0.0
+servers:
+  - url: https://plausible.io/api
+    description: Production server
+paths:
+  /event:
+    post:
+      summary: Record a pageview or custom event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the event. Can be 'pageview' or a custom event name.
+                  example: pageview
+                domain:
+                  type: string
+                  description: Domain name of the site in Plausible.
+                  example: dummy.site
+                url:
+                  type: string
+                  format: uri
+                  description: URL of the page where the event was triggered.
+                  example: http://dummy.site
+                referrer:
+                  type: string
+                  description: Referrer for this event.
+                  example: http://referrer.site
+                props:
+                  type: object
+                  description: Custom properties for the event.
+                  example: {"author": "John Doe", "logged_in": "false"}
+                revenue:
+                  type: object
+                  description: Revenue data for this event.
+                  properties:
+                    currency:
+                      type: string
+                      description: ISO 4217 string representing the currency code.
+                      example: USD
+                    amount:
+                      type: number
+                      description: Revenue amount.
+                      example: 1322.22
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
