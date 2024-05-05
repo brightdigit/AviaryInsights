@@ -16,6 +16,10 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - domain
+                - url
               properties:
                 name:
                   type: string
@@ -41,6 +45,9 @@ paths:
                 revenue:
                   type: object
                   description: Revenue data for this event.
+                  required:
+                    - currency
+                    - amount
                   properties:
                     currency:
                       type: string

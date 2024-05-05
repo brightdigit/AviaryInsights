@@ -88,15 +88,15 @@ internal enum Operations {
                     /// Name of the event. Can be 'pageview' or a custom event name.
                     ///
                     /// - Remark: Generated from `#/paths/event/POST/requestBody/json/name`.
-                    internal var name: Swift.String?
+                    internal var name: Swift.String
                     /// Domain name of the site in Plausible.
                     ///
                     /// - Remark: Generated from `#/paths/event/POST/requestBody/json/domain`.
-                    internal var domain: Swift.String?
+                    internal var domain: Swift.String
                     /// URL of the page where the event was triggered.
                     ///
                     /// - Remark: Generated from `#/paths/event/POST/requestBody/json/url`.
-                    internal var url: Swift.String?
+                    internal var url: Swift.String
                     /// Referrer for this event.
                     ///
                     /// - Remark: Generated from `#/paths/event/POST/requestBody/json/referrer`.
@@ -112,19 +112,19 @@ internal enum Operations {
                         /// ISO 4217 string representing the currency code.
                         ///
                         /// - Remark: Generated from `#/paths/event/POST/requestBody/json/revenue/currency`.
-                        internal var currency: Swift.String?
+                        internal var currency: Swift.String
                         /// Revenue amount.
                         ///
                         /// - Remark: Generated from `#/paths/event/POST/requestBody/json/revenue/amount`.
-                        internal var amount: Swift.Double?
+                        internal var amount: Swift.Double
                         /// Creates a new `revenuePayload`.
                         ///
                         /// - Parameters:
                         ///   - currency: ISO 4217 string representing the currency code.
                         ///   - amount: Revenue amount.
                         internal init(
-                            currency: Swift.String? = nil,
-                            amount: Swift.Double? = nil
+                            currency: Swift.String,
+                            amount: Swift.Double
                         ) {
                             self.currency = currency
                             self.amount = amount
@@ -148,9 +148,9 @@ internal enum Operations {
                     ///   - props: Custom properties for the event.
                     ///   - revenue: Revenue data for this event.
                     internal init(
-                        name: Swift.String? = nil,
-                        domain: Swift.String? = nil,
-                        url: Swift.String? = nil,
+                        name: Swift.String,
+                        domain: Swift.String,
+                        url: Swift.String,
                         referrer: Swift.String? = nil,
                         props: OpenAPIRuntime.OpenAPIObjectContainer? = nil,
                         revenue: Operations.post_sol_event.Input.Body.jsonPayload.revenuePayload? = nil
