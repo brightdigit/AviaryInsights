@@ -33,6 +33,8 @@ fi
 
 pushd $PACKAGE_DIR
 
+$MINT_RUN swift-openapi-generator generate --output-directory Sources/AviaryInsights/Generated --config openapi-generator-config.yaml openapi.yaml
+
 if [ -z "$CI" ]; then
 	$MINT_RUN swiftformat .
 	$MINT_RUN swiftlint --fix

@@ -114,5 +114,6 @@ excluded:
   - DerivedData
   - .build
   - .swiftpm
+  - Sources/AviaryInsights/Generated
 indentation_width:
   indentation_width: 2
