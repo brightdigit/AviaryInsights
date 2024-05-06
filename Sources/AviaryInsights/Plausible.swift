@@ -31,6 +31,10 @@ import Foundation
 import OpenAPIRuntime
 import OpenAPIURLSession
 
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
+
 public struct Plausible {
   // swiftlint:disable:next force_try
   public static let defaultServerURL = try! Servers.server1()
