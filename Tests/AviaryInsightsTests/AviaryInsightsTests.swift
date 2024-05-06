@@ -73,7 +73,7 @@ final class AviaryInsightsTests: XCTestCase {
   func randomProps() -> [String: (any Sendable)?] {
     var values = [String: (any Sendable)?]()
     let keyCount: Int = .random(in: 3 ... 7)
-    for index in 0 ..< keyCount {
+    for _ in 0 ..< keyCount {
       let value: any Sendable
       let type: Bool = .random()
       switch type {
@@ -98,9 +98,9 @@ final class AviaryInsightsTests: XCTestCase {
       let count: Int = .random(in: 10 ... 20)
       return (0 ..< count).map { _ in
         Event(
+          url: UUID().uuidString,
           name: UUID().uuidString,
           domain: Bool.random() ? UUID().uuidString : nil,
-          url: UUID().uuidString,
           referrer: Bool.random() ? UUID().uuidString : nil,
           props: Bool.random() ? randomProps() : nil,
           revenue: Bool.random() ? .random() : nil

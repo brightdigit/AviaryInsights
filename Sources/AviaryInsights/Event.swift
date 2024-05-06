@@ -28,6 +28,7 @@
 //
 
 public struct Event {
+  public static let pageview = "pageview"
   public let name: String
   public let domain: String?
   public let url: String
@@ -36,8 +37,8 @@ public struct Event {
   public let revenue: Revenue?
 
   public init(
-    name: String,
     url: String,
+    name: String = Self.pageview,
     domain: String? = nil,
     referrer: String? = nil,
     props: [String: (any Sendable)?]? = nil,
