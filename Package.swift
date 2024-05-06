@@ -26,7 +26,10 @@ let package = Package(
     ),
     .testTarget(
       name: "AviaryInsightsTests",
-      dependencies: ["AviaryInsights"]
+      dependencies: [
+        "AviaryInsights",
+        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+      ]
     )
   ]
 )

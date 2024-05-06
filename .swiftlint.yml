@@ -117,3 +117,5 @@ excluded:
   - Sources/AviaryInsights/Generated
 indentation_width:
   indentation_width: 2
+file_name: 
+  excluded: ["Operations.swift"]

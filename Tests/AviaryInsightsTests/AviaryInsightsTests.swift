@@ -28,10 +28,102 @@
 //
 
 @testable import AviaryInsights
+import HTTPTypes
+import OpenAPIRuntime
 import XCTest
 
+final actor MockTransport: ClientTransport {
+  internal init(nextResponse: @escaping @Sendable () -> Response) {
+    sentRequests = []
+    self.nextResponse = nextResponse
+  }
+
+  struct Request {
+    let request: HTTPRequest
+    let body: HTTPBody?
+    let baseURL: URL
+    let operationID: String
+  }
+
+  struct Response {
+    let response: HTTPResponse
+    let body: HTTPBody?
+
+    func tuple() -> (HTTPResponse, HTTPBody?) {
+      (response, body)
+    }
+  }
+
+  private(set) var sentRequests = [Request]()
+  let nextResponse: @Sendable () -> Response
+
+  func send(_ request: HTTPRequest, body: HTTPBody?, baseURL: URL, operationID: String) async throws -> (HTTPResponse, HTTPBody?) {
+    sentRequests.append(.init(request: request, body: body, baseURL: baseURL, operationID: operationID))
+    return nextResponse().tuple()
+  }
+}
+
+extension Revenue {
+  static func random() -> Revenue {
+    .init(currency: UUID().uuidString, amount: .random(in: 20 ... 999))
+  }
+}
+
 final class AviaryInsightsTests: XCTestCase {
-  func testExample() throws {
+  func randomProps() -> [String: (any Sendable)?] {
+    var values = [String: (any Sendable)?]()
+    let keyCount: Int = .random(in: 3 ... 7)
+    for index in 0 ..< keyCount {
+      let value: any Sendable
+      let type: Bool = .random()
+      switch type {
+      case false:
+        value = Int.random(in: 100 ... 999)
+      case true:
+        value = UUID().uuidString
+      }
+      values[UUID().uuidString] = value
+    }
+    return values
+  }
+
+  func testPostEvent() async throws {
+    let transport = MockTransport {
+      .init(response: .init(status: .accepted), body: "{}")
+    }
+
+    let defaultDomain = UUID().uuidString
+    let client = Plausible(transport: transport, defaultDomain: defaultDomain)
+    let events: [Event] = {
+      let count: Int = .random(in: 10 ... 20)
+      return (0 ..< count).map { _ in
+        Event(
+          name: UUID().uuidString,
+          domain: Bool.random() ? UUID().uuidString : nil,
+          url: UUID().uuidString,
+          referrer: Bool.random() ? UUID().uuidString : nil,
+          props: Bool.random() ? randomProps() : nil,
+          revenue: Bool.random() ? .random() : nil
+        )
+      }
+    }()
+
+    for event in events {
+      try await client.postEvent(event)
+    }
+
+    let requests = await transport.sentRequests
+    let decoder = JSONDecoder()
+    for (event, request) in zip(events, requests) {
+      guard let body = request.body else {
+        XCTAssertNotNil(request.body)
+        continue
+      }
+      let data = try await Data(collecting: body, upTo: .max)
+      let actualJSONPayload = try decoder.decode(Operations.post_sol_event.Input.Body.jsonPayload.self, from: data)
+      let expectedJSONPayload = Operations.post_sol_event.Input.Body.jsonPayload(event: event, defaultDomain: defaultDomain)
+      XCTAssertEqual(actualJSONPayload, expectedJSONPayload)
+    }
     // XCTest Documentation
     // https://developer.apple.com/documentation/xctest
 
