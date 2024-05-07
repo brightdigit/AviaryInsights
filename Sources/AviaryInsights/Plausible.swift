@@ -1,6 +1,6 @@
 //
 //  Plausible.swift
-//  SimulatorServices
+//  AviaryInsights
 //
 //  Created by Leo Dion.
 //  Copyright © 2024 BrightDigit.
@@ -32,7 +32,7 @@ import OpenAPIRuntime
 import OpenAPIURLSession
 
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+  import FoundationNetworking
 #endif
 
 public struct Plausible {

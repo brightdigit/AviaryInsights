@@ -22,6 +22,16 @@ let package = Package(
       dependencies: [
         .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+      ],
+      swiftSettings: [
+        SwiftSetting.enableUpcomingFeature("BareSlashRegexLiterals"),
+        SwiftSetting.enableUpcomingFeature("ConciseMagicFile"),
+        SwiftSetting.enableUpcomingFeature("ExistentialAny"),
+        SwiftSetting.enableUpcomingFeature("ForwardTrailingClosures"),
+        SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
+        SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
+        SwiftSetting.enableExperimentalFeature("StrictConcurrency"),
+        SwiftSetting.unsafeFlags(["-warn-concurrency", "-enable-actor-data-race-checks"])
       ]
     ),
     .testTarget(

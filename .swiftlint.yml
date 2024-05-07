@@ -1,6 +1,5 @@
 opt_in_rules:
   - array_init
-  - attributes
   - closure_body_length
   - closure_end_indentation
   - closure_spacing
@@ -22,7 +21,7 @@ opt_in_rules:
   - explicit_acl
   - explicit_init
   - explicit_top_level_acl
-  - fallthrough
+  # - fallthrough
   - fatal_error_message
   - file_name
   - file_name_no_space
@@ -30,7 +29,7 @@ opt_in_rules:
   - first_where
   - flatmap_over_map_reduce
   - force_unwrapping
-  - function_default_parameter_at_end
+#  - function_default_parameter_at_end
   - ibinspectable_in_extension
   - identical_operands
   - implicit_return
@@ -42,7 +41,7 @@ opt_in_rules:
   - legacy_random
   - literal_expression_end_indentation
   - lower_acl_than_parent
-  #- missing_docs
+#  - missing_docs
   - modifier_order
   - multiline_arguments
   - multiline_arguments_brackets
@@ -78,7 +77,7 @@ opt_in_rules:
   - static_operator
   - strong_iboutlet
   - toggle_bool
-  - trailing_closure
+#  - trailing_closure
   - type_contents_order
   - unavailable_function
   - unneeded_parentheses_in_closure_argument
@@ -90,32 +89,44 @@ opt_in_rules:
   - xct_specific_matcher
   - yoda_condition
 analyzer_rules:
-  - explicit_self
-  - unused_declaration
   - unused_import  
+  - unused_declaration
+cyclomatic_complexity:
+  - 6
+  - 12
 type_body_length:
   - 100
   - 200
 file_length:
-  - 200
-  - 300
+  warning: 215
+  error: 300
 function_body_length:
   - 18
   - 40
 function_parameter_count: 8
 line_length:
-  - 90
-  - 90
+  - 108
+  - 200
+closure_body_length:
+  - 50
+  - 60
 identifier_name:
   excluded:
     - id
+    - no
 excluded:
-  - Tests
   - DerivedData
   - .build
   - .swiftpm
   - Sources/AviaryInsights/Generated
 indentation_width:
   indentation_width: 2
-file_name: 
-  excluded: ["Operations.swift"]
+file_name:
+    severity: error
+    excluded: ["Operations.swift"]
+fatal_error_message:
+    severity: error
+disabled_rules:
+    - nesting
+    - implicit_getter
+    - switch_case_alignment
