@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Revenue {
+public struct Revenue: Sendable {
   public let currency: String
   public let amount: Double
 

@@ -35,7 +35,7 @@ import OpenAPIURLSession
   import FoundationNetworking
 #endif
 
-public struct Plausible {
+public struct Plausible: Sendable {
   // swiftlint:disable:next force_try
   public static let defaultServerURL = try! Servers.server1()
 

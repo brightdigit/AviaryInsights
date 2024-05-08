@@ -5,7 +5,14 @@ import PackageDescription
 // swiftlint:disable:next explicit_top_level_acl explicit_acl
 let package = Package(
   name: "AviaryInsights",
-  platforms: [.macOS(.v10_15)],
+  platforms: [
+    .macOS(.v10_15),
+    .iOS(.v13),
+    .macCatalyst(.v13),
+    .tvOS(.v13),
+    .visionOS(.v1),
+    .watchOS(.v6)
+  ],
   products: [
     .library(
       name: "AviaryInsights",

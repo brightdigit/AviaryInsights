@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Event {
+public struct Event: Sendable {
   public static let pageview = "pageview"
   public let name: String
   public let domain: String?
