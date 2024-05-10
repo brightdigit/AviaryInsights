@@ -27,10 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents revenue data for an event in Plausible.
 public struct Revenue: Sendable {
+  /// Currency code for the revenue amount.
   public let currency: String
+
+  /// Amount of revenue.
   public let amount: Double
 
+  /// Initializes revenue data for an event.
+  /// - Parameters:
+  ///   - currency: Currency code for the revenue amount.
+  ///   - amount: Amount of revenue.
   public init(currency: String, amount: Double) {
     self.currency = currency
     self.amount = amount

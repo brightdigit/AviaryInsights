@@ -35,11 +35,15 @@ import OpenAPIURLSession
   import FoundationNetworking
 #endif
 
+/// Represents an interface to interact with the Plausible API.
 public struct Plausible: Sendable {
-  // swiftlint:disable:next force_try
+  // swiftlint:disable force_try
+  /// Default server URL for the Plausible API.
   public static let defaultServerURL = try! Servers.server1()
+  // swiftlint:enable force_try
 
   private let client: Client
+  /// Default domain associated with the Plausible instance.
   public let defaultDomain: String
 
   private init(client: Client, defaultDomain: String) {
@@ -47,6 +51,11 @@ public struct Plausible: Sendable {
     self.defaultDomain = defaultDomain
   }
 
+  /// Initializes a Plausible instance.
+  /// - Parameters:
+  ///   - transport: Client transport for sending requests.
+  ///   - defaultDomain: Default domain associated with the Plausible instance.
+  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
   public init(
     transport: any ClientTransport,
     defaultDomain: String,
@@ -56,6 +65,11 @@ public struct Plausible: Sendable {
     self.init(client: client, defaultDomain: defaultDomain)
   }
 
+  /// Initializes a Plausible instance.
+  /// - Parameters:
+  ///   - defaultDomain: Default domain associated with the Plausible instance.
+  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+  ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
   public init(
     defaultDomain: String,
     serverURL: URL = Self.defaultServerURL,
@@ -73,6 +87,11 @@ public struct Plausible: Sendable {
     )
   }
 
+  /// Initializes a Plausible instance with a custom URLSession.
+  /// - Parameters:
+  ///   - session: URLSession to use for making requests.
+  ///   - defaultDomain: Default domain associated with the Plausible instance.
+  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
   public init(
     session: URLSession,
     defaultDomain: String,
@@ -85,6 +104,8 @@ public struct Plausible: Sendable {
     )
   }
 
+  /// Sends an event to the Plausible API.
+  /// - Parameter event: Event to be sent.
   public func postEvent(_ event: Event) async throws {
     _ = try await client.post_sol_event(
       body: .init(event: event, defaultDomain: defaultDomain)

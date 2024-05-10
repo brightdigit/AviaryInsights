@@ -27,15 +27,37 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents an event in Plausible, such as a pageview or a custom event.
 public struct Event: Sendable {
+  /// Default name for a pageview event.
   public static let pageview = "pageview"
+
+  /// Name of the event.
   public let name: String
+
+  /// Domain name of the site in Plausible.
   public let domain: String?
+
+  /// URL of the page where the event was triggered.
   public let url: String
+
+  /// Referrer for this event.
   public let referrer: String?
-  public let props: [String: (any Sendable)?]?
+
+  /// Custom properties for the event.
+  public let props: [String: any Sendable]?
+
+  /// Revenue data for this event.
   public let revenue: Revenue?
 
+  /// Initializes an event.
+  /// - Parameters:
+  ///   - url: URL of the page where the event was triggered.
+  ///   - name: Name of the event. Defaults to `pageview`.
+  ///   - domain: Domain name of the site in Plausible. Defaults to `nil`.
+  ///   - referrer: Referrer for this event. Defaults to `nil`.
+  ///   - props: Custom properties for the event. Defaults to `nil`.
+  ///   - revenue: Revenue data for this event. Defaults to `nil`.
   public init(
     url: String,
     name: String = Self.pageview,
