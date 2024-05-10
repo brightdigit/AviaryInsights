@@ -32,11 +32,19 @@ import HTTPTypes
 import OpenAPIRuntime
 
 internal final actor MockTransport: ClientTransport {
+  // periphery:ignore
   internal struct Request {
-    internal let request: HTTPRequest
+    internal init(request: HTTPRequest, body: HTTPBody? = nil, baseURL: URL, operationID: String) {
+      self.request = request
+      self.body = body
+      self.baseURL = baseURL
+      self.operationID = operationID
+    }
+
+    private let request: HTTPRequest
     internal let body: HTTPBody?
-    internal let baseURL: URL
-    internal let operationID: String
+    private let baseURL: URL
+    private let operationID: String
   }
 
   internal struct Response {

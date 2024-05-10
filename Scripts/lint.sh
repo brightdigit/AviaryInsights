@@ -40,6 +40,7 @@ if [ -z "$CI" ]; then
 	$MINT_RUN swiftlint --fix
 fi
 
+$MINT_RUN periphery scan
 $MINT_RUN swiftformat --lint $SWIFTFORMAT_OPTIONS .
 $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
 

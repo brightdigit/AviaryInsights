@@ -93,6 +93,8 @@ public struct Plausible: Sendable {
 }
 
 extension Plausible {
+  /// Sends the event to Plausible in the background.
+  /// - Parameter event: An analytic event to record.
   public func postEvent(_ event: Event) {
     Task {
       do {
