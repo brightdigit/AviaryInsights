@@ -19,7 +19,19 @@ Easy to use Swift Package for recording pageviews and custom events for Plausibl
 [![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/AviaryInsights)](https://codeclimate.com/github/brightdigit/AviaryInsights)
 [![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
+Table of Contents
+=================
 
+* [Features](#features)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Sending an Event](#sending-an-event)
+    * [Asynchronous Throwing Method](#asynchronous-throwing-method)
+    * [Synchronous Method](#synchronous-method)
+* [Contributing](#contributing)
+* [License](#license)
+   
 ## Features
 
 Plausible provides simple and meaningful insights into your website's traffic without invading the privacy of your visitors. However, integrating Plausible into a Swift application can be complex and time-consuming. AviaryInsights simplifies this process, allowing you to focus on building your application while still gaining the valuable insights that Plausible provides.
@@ -128,10 +140,6 @@ plausible.postEvent(event)
 ```
 
 In both cases, `event` is an instance of `Event` that you want to send to the Plausible API.
-
-## Contributing
-
-Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTING.md) to get started.
 
 ## License
 

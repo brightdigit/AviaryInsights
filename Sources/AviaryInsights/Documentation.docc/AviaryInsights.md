@@ -117,6 +117,11 @@ In both cases, `event` is an instance of ``Event`` that you want to send to the 
 
 ## Topics
 
-### <!--@START_MENU_TOKEN@-->Group<!--@END_MENU_TOKEN@-->
+### Creating a Client
 
-- <!--@START_MENU_TOKEN@-->``Symbol``<!--@END_MENU_TOKEN@-->
+- ``Plausible``
+
+### Building an Event
+
+- ``Event``
+- ``Revenue``
