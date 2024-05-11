@@ -28,6 +28,8 @@
 //
 
 /// Represents an event in Plausible, such as a pageview or a custom event.
+///
+/// ``Event`` represents an event you can send to a ``Plausible``. An event has a name and URL, and optionally, a domain, referrer, custom properties (`props`), and revenue information.
 public struct Event: Sendable {
   /// Default name for a pageview event.
   public static let pageview = "pageview"

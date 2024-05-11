@@ -19,14 +19,16 @@ Easy to use Swift Package for recording pageviews and custom events for Plausibl
 [![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/AviaryInsights)](https://codeclimate.com/github/brightdigit/AviaryInsights)
 [![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
-# Requirements 
 
 ## Features
 
-- Event tracking: Define and track custom events in your application.
-- Revenue tracking: Track revenue data associated with events.
-- Plausible API integration: Send your events to the Plausible API for further analysis.
+Plausible provides simple and meaningful insights into your website's traffic without invading the privacy of your visitors. However, integrating Plausible into a Swift application can be complex and time-consuming. AviaryInsights simplifies this process, allowing you to focus on building your application while still gaining the valuable insights that Plausible provides.
 
+- **Event tracking** Define and track custom events in your application.
+- **Revenue tracking** Track revenue data associated with events.
+- **Plausible API integration** Send your events to the Plausible API for further analysis.
+
+## Requirements 
 
 **Apple Platforms**
 
@@ -64,9 +66,7 @@ let event = Event(url: "app://localhost/login")
 plausible.send(event: event)
 ```
 
-## Main Components
-
-### Plausible
+### `Plausible` Client
 
 `Plausible` is a client for interacting with the Plausible API. It is initialized with a domain, which is typically your app's bundle identifier. The `Plausible` client is used to send events to the Plausible API for tracking and analysis.
 
@@ -78,7 +78,7 @@ let plausible = Plausible(domain: "com.example.yourApp")
 
 By default `Plausible` uses a `URLSessionTransport`, however you can use alternatives such as AsyncClient.
 
-### Event
+### Sending an `Event`
 
 `Event` represents an event in your system. An event has a name, and optionally, a domain, URL, referrer, custom properties (`props`), and revenue information. You can create an `Event` instance and send it using the `Plausible` client.
 
@@ -104,6 +104,30 @@ let event = Event
     )
 )
 ```
+
+AviaryInsights provides two ways to send events to the Plausible API:
+
+#### Asynchronous Throwing Method
+
+This method sends an event to the Plausible API and throws an error if the operation fails. This is useful when you want to handle errors in your own way. Here's an example:
+
+```swift
+do {
+    try await plausible.postEvent(event)
+} catch {
+    print("Failed to post event: \(error)")
+}
+```
+
+#### Synchronous Method
+
+This method sends an event to the Plausible API in the background and ignores any errors that occur. This is useful when you don't need to handle errors and want to fire-and-forget the event. Here's an example:
+
+```swift
+plausible.postEvent(event)
+```
+
+In both cases, `event` is an instance of `Event` that you want to send to the Plausible API.
 
 ## Contributing
 
