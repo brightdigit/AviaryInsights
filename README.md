@@ -112,6 +112,3 @@ Contributions are welcome! Please read our [contributing guidelines](CONTRIBUTIN
 ## License
 
 AviaryInsights is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
-```
-
-Please replace the placeholders with the actual values. Also, you might want to add more details about the package, its usage, and its features.
