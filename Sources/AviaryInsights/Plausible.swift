@@ -37,20 +37,24 @@ import OpenAPIURLSession
 
 /// Represents an interface to interact with the Plausible API.
 ///
-/// ``Plausible`` is a client for interacting with the Plausible API. It is initialized with a domain, which is typically your app's bundle identifier. The ``Plausible`` client is used to send events to the Plausible API for tracking and analysis.
+/// ``Plausible`` is a client for interacting with the Plausible API.
+/// It is initialized with a domain, which is typically your app's bundle identifier.
+/// The ``Plausible`` client is used to send events to the Plausible API for tracking and analysis.
 ///
 /// To construct a ``Plausible`` instance, you need to provide a domain. The domain is a string that identifies your application, typically the bundle identifier of your app.
 ///
 /// ```swift
 /// let plausible = Plausible(domain: "com.example.yourApp")
 /// ```
-/// By default ``Plausible`` uses a [`URLSessionTransport`](https://github.com/apple/swift-openapi-urlsession), however you can use alternatives such as [`AsyncHTTPClient`](https://github.com/swift-server/swift-openapi-async-http-client).
+/// By default ``Plausible`` uses a [`URLSessionTransport`](https://github.com/apple/swift-openapi-urlsession),
+/// however you can use alternatives such as [`AsyncHTTPClient`](https://github.com/swift-server/swift-openapi-async-http-client).
 ///
 /// ## Sending Event
 /// AviaryInsights provides two ways to send an ``Event`` to the Plausible API:
 /// ### Asynchronous Throwing Method
 ///
-/// This method sends an event to the Plausible API and throws an error if the operation fails. This is useful when you want to handle errors in your own way. Here's an example:
+/// This method sends an event to the Plausible API and throws an error if the operation fails.
+/// This is useful when you want to handle errors in your own way. Here's an example:
 ///
 /// ```swift
 /// do {
@@ -62,7 +66,8 @@ import OpenAPIURLSession
 ///
 /// ### Synchronous Method
 ///
-/// This method sends an event to the Plausible API in the background and ignores any errors that occur. This is useful when you don't need to handle errors and want to fire-and-forget the event. Here's an example:
+/// This method sends an event to the Plausible API in the background and ignores any errors that occur.
+/// This is useful when you don't need to handle errors and want to fire-and-forget the event. Here's an example:
 ///
 /// ```swift
 /// plausible.postEvent(event)
