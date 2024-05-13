@@ -35,13 +35,16 @@ import OpenAPIURLSession
   import FoundationNetworking
 #endif
 
+// swiftlint:disable line_length
+
 /// Represents an interface to interact with the Plausible API.
 ///
 /// ``Plausible`` is a client for interacting with the Plausible API.
 /// It is initialized with a domain, which is typically your app's bundle identifier.
 /// The ``Plausible`` client is used to send events to the Plausible API for tracking and analysis.
 ///
-/// To construct a ``Plausible`` instance, you need to provide a domain. The domain is a string that identifies your application, typically the bundle identifier of your app.
+/// To construct a ``Plausible`` instance, you need to provide a domain.
+/// The domain is a string that identifies your application, typically the bundle identifier of your app.
 ///
 /// ```swift
 /// let plausible = Plausible(domain: "com.example.yourApp")
@@ -67,13 +70,15 @@ import OpenAPIURLSession
 /// ### Synchronous Method
 ///
 /// This method sends an event to the Plausible API in the background and ignores any errors that occur.
-/// This is useful when you don't need to handle errors and want to fire-and-forget the event. Here's an example:
+/// This is useful when you don't need to handle errors and
+/// want to fire-and-forget the event. Here's an example:
 ///
 /// ```swift
 /// plausible.postEvent(event)
 /// ```
 /// In both cases, `event` is an instance of ``Event`` that you want to send to the Plausible API.
 public struct Plausible: Sendable {
+  // swiftlint:enable line_length
   // swiftlint:disable force_try
   /// Default server URL for the Plausible API.
   public static let defaultServerURL = try! Servers.server1()
