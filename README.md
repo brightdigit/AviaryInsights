@@ -60,7 +60,7 @@ To add the AviaryInsights package to your Xcode project, select File > Swift Pac
 Using Swift Package Manager add the repository url:
 
 ```
-https://github.com/brightdigit/README.git
+https://github.com/brightdigit/AviaryInsights.git
 ```
 
 ## Usage
