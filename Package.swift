@@ -37,8 +37,7 @@ let package = Package(
         SwiftSetting.enableUpcomingFeature("ForwardTrailingClosures"),
         SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
         SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
-        SwiftSetting.enableExperimentalFeature("StrictConcurrency"),
-        SwiftSetting.unsafeFlags(["-warn-concurrency", "-enable-actor-data-race-checks"])
+        SwiftSetting.enableExperimentalFeature("StrictConcurrency")
       ]
     ),
     .testTarget(
