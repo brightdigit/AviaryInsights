@@ -24,14 +24,8 @@ extension APIProtocol {
     ///
     /// - Remark: HTTP `POST /event`.
     /// - Remark: Generated from `#/paths//event/post`.
-    internal func post_sol_event(
-        headers: Operations.post_sol_event.Input.Headers = .init(),
-        body: Operations.post_sol_event.Input.Body
-    ) async throws -> Operations.post_sol_event.Output {
-        try await post_sol_event(Operations.post_sol_event.Input(
-            headers: headers,
-            body: body
-        ))
+    internal func post_sol_event(body: Operations.post_sol_event.Input.Body) async throws -> Operations.post_sol_event.Output {
+        try await post_sol_event(Operations.post_sol_event.Input(body: body))
     }
 }
 
@@ -69,18 +63,6 @@ internal enum Operations {
     internal enum post_sol_event {
         internal static let id: Swift.String = "post/event"
         internal struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/event/POST/header`.
-            internal struct Headers: Sendable, Hashable {
-                internal var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_event.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                internal init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.post_sol_event.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            internal var headers: Operations.post_sol_event.Input.Headers
             /// - Remark: Generated from `#/paths/event/POST/requestBody`.
             @frozen internal enum Body: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/event/POST/requestBody/json`.
@@ -178,44 +160,15 @@ internal enum Operations {
             /// Creates a new `Input`.
             ///
             /// - Parameters:
-            ///   - headers:
             ///   - body:
-            internal init(
-                headers: Operations.post_sol_event.Input.Headers = .init(),
-                body: Operations.post_sol_event.Input.Body
-            ) {
-                self.headers = headers
+            internal init(body: Operations.post_sol_event.Input.Body) {
                 self.body = body
             }
         }
         @frozen internal enum Output: Sendable, Hashable {
             internal struct Accepted: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/event/POST/responses/202/content`.
-                @frozen internal enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/event/POST/responses/202/content/application\/json`.
-                    case json(OpenAPIRuntime.OpenAPIObjectContainer)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    internal var json: OpenAPIRuntime.OpenAPIObjectContainer {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                internal var body: Operations.post_sol_event.Output.Accepted.Body
                 /// Creates a new `Accepted`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                internal init(body: Operations.post_sol_event.Output.Accepted.Body) {
-                    self.body = body
-                }
+                internal init() {}
             }
             /// Accepted
             ///
@@ -244,31 +197,6 @@ internal enum Operations {
             ///
             /// A response with a code that is not documented in the OpenAPI document.
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen internal enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            internal init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            internal var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            internal static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
         }
     }
 }
