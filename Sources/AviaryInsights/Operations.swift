@@ -49,7 +49,8 @@ extension Operations.post_sol_event.Input.Body.jsonPayload {
       domain: event.domain ?? defaultDomain,
       url: event.url,
       referrer: event.referrer,
-      props: propsContainer
+      props: propsContainer,
+      revenue: .init(revenue: event.revenue)
     )
   }
 }
