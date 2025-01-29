@@ -4,4 +4,4 @@
 --disable wrapMultilineStatementBraces, redundantInternal,redundantSelf,wrapMultilineStatementBraces,genericExtensions
 --extensionacl on-declarations
 --decimalgrouping 3,4
---exclude .build, DerivedData, .swiftpm, Sources/AviaryInsights/Generated
+--exclude .build, DerivedData, .swiftpm, Sources/AviaryInsights/Generated, Mint
