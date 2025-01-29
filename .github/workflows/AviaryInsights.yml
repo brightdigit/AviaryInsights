@@ -73,11 +73,11 @@ jobs:
       matrix:
         include:
           # SPM Build Matrix
-          - runs-on: macos-13
+          - runs-on: macos-14
             xcode: "/Applications/Xcode_15.0.1.app"
-          - runs-on: macos-13
+          - runs-on: macos-14
             xcode: "/Applications/Xcode_15.1.app"
-          - runs-on: macos-13
+          - runs-on: macos-14
             xcode: "/Applications/Xcode_15.2.app"
           - runs-on: macos-15
             xcode: "/Applications/Xcode_16.1.app"
@@ -86,58 +86,72 @@ jobs:
           
           # iOS Build Matrix
           - type: ios
-            runs-on: macos-13
+            runs-on: macos-14
             xcode: "/Applications/Xcode_15.0.1.app"
             deviceName: "iPhone 15"
-            osVersion: "17.0.1"
+            AviaryInsightssion: "17.0.1"
           - type: ios
-            runs-on: macos-13
+            runs-on: macos-14
             xcode: "/Applications/Xcode_15.1.app"
             deviceName: "iPhone 15 Pro"
-            osVersion: "17.2"
+            AviaryInsightssion: "17.2"
           - type: ios
-            runs-on: macos-13
+            runs-on: macos-14
             xcode: "/Applications/Xcode_15.2.app"
             deviceName: "iPhone 15 Pro Max"
-            osVersion: "17.2"
+            AviaryInsightssion: "17.2"
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.1.app"
             deviceName: "iPhone 16"
-            osVersion: "18.1"
+            AviaryInsightssion: "18.1"
           - type: ios
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "iPhone 16 Pro"
-            osVersion: "18.2"
+            AviaryInsightssion: "18.2"
   
           # watchOS Build Matrix
           - type: watchos
-            runs-on: macos-13
+            runs-on: macos-14
             xcode: "/Applications/Xcode_15.0.1.app"
             deviceName: "Apple Watch Series 9 (41mm)"
-            osVersion: "10.0"
+            AviaryInsightssion: "10.0"
           - type: watchos
-            runs-on: macos-13
+            runs-on: macos-14
             xcode: "/Applications/Xcode_15.1.app"
             deviceName: "Apple Watch Series 9 (45mm)"
-            osVersion: "10.2"
+            AviaryInsightssion: "10.2"
           - type: watchos
-            runs-on: macos-13
+            runs-on: macos-14
             xcode: "/Applications/Xcode_15.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "10.2"
+            AviaryInsightssion: "10.2"
           - type: watchos
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.1.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.1"
+            AviaryInsightssion: "11.1"
           - type: watchos
             runs-on: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.2"
-  
+            AviaryInsightssion: "11.2"
+    
+          # visionOS Build Matrix
+          - type: visionos
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.2.app"
+            deviceName: "Apple Vision Pro"
+            AviaryInsightssion: "2.1"
+    
+          # tvOS Build Matrix
+          - type: tvos
+            runs-on: macos-15
+            xcode: "/Applications/Xcode_16.2.app"
+            deviceName: "Apple TV 4K (3rd generation)"
+            AviaryInsightssion: "18.2"
+    
     steps:
       - uses: actions/checkout@v4
       
@@ -146,20 +160,46 @@ jobs:
       
       - name: Setup Xcode
         run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
-  
-      # SPM Cache Step
+    
+      - name: Set SDK and Platform
+        if: matrix.type
+        run: |
+          case ${{ matrix.type }} in
+            ios)
+              echo "PLATFORM=iOS Simulator" >> $GITHUB_ENV
+              echo "SDK=iphonesimulator" >> $GITHUB_ENV
+              ;;
+            watchos)
+              echo "PLATFORM=watchOS Simulator" >> $GITHUB_ENV
+              echo "SDK=watchsimulator" >> $GITHUB_ENV
+              ;;
+            visionos)
+              echo "PLATFORM=visionOS Simulator" >> $GITHUB_ENV
+              echo "SDK=xrsimulator" >> $GITHUB_ENV
+              ;;
+            tvos)
+              echo "PLATFORM=tvOS Simulator" >> $GITHUB_ENV
+              echo "SDK=appletvsimulator" >> $GITHUB_ENV
+              ;;
+            esac
+      - uses: irgaly/xcode-cache@v1
+        if: matrix.type
+        with:
+          key: xcode-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-${{ hashFiles('Package.resolved') }}-${{ github.sha }}
+          restore-keys: |
+            xcode-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-${{ hashFiles('Package.resolved') }}-                        
+            xcode-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-          
       - name: Cache swift package modules
         id: cache-spm-macos
+        if: "!matrix.type"
         uses: actions/cache@v4
         env:
           cache-name: cache-spm
         with:
           path: .build
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('Package.resolved') }}
+          key: spm-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-${{ hashFiles('Package.resolved') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            spm-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-
   
       - name: Build SPM
         if: "!matrix.type"
@@ -175,10 +215,9 @@ jobs:
         run: >
           xcodebuild test
           -scheme ${{ env.PACKAGE_NAME }}
-          -sdk ${{ matrix.type == 'ios' && 'iphonesimulator' || 'watchsimulator' }}
-          -destination 'platform=${{ matrix.type == 'ios' && 'iOS Simulator' || 'watchOS Simulator' }},name=${{ matrix.deviceName }},OS=${{ matrix.osVersion }}'
+          -sdk ${{ env.SDK }}
+          -destination 'platform=${{ env.PLATFORM }},name=${{ matrix.deviceName }},OS=${{ matrix.AviaryInsightssion }}'
           -enableCodeCoverage YES
-          build test
   
       # Common Coverage Steps
       - name: Process Coverage
@@ -190,4 +229,34 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
+          flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.AviaryInsightssion) || 'spm' }}
+  lint:
+    name: Linting
+    if: "!contains(github.event.head_commit.message, 'ci skip')"  
+    runs-on: ubuntu-latest
+    needs: [build-ubuntu, build-macos]
+    env:
+      MINT_PATH: .mint/lib
+      MINT_LINK_PATH: .mint/bin
+    steps:
+      - uses: actions/checkout@v4    
+      - name: Cache mint
+        id: cache-mint
+        uses: actions/cache@v4  
+        env:
+          cache-name: cache
+        with:
+          path: |
+            .mint
+            Mint         
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-  
+      - name: Install mint
+        if: steps.cache-mint.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/yonaskolb/Mint.git
+          cd Mint
+          swift run mint install yonaskolb/mint
+      - name: Lint
+        run: ./Scripts/lint.sh
