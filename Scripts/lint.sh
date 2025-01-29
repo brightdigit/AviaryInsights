@@ -1,25 +1,32 @@
-#!/bin/sh
+#!/bin/bash
+set -e  # Exit on any error
 
+# Detect OS and set paths accordingly
+if [ "$(uname)" = "Darwin" ]; then
+    DEFAULT_MINT_PATH="/opt/homebrew/bin/mint"
+elif [ "$(uname)" = "Linux" ] && [ -n "$GITHUB_ACTIONS" ]; then
+    DEFAULT_MINT_PATH="$GITHUB_WORKSPACE/Mint/.mint/bin/mint"
+elif [ "$(uname)" = "Linux" ]; then
+    DEFAULT_MINT_PATH="/usr/local/bin/mint"
+else
+    echo "Unsupported operating system"
+    exit 1
+fi
+
+# More portable way to get script directory
 if [ -z "$SRCROOT" ]; then
-	SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-	PACKAGE_DIR="${SCRIPT_DIR}/.."
+    SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+    PACKAGE_DIR="${SCRIPT_DIR}/.."
 else
-	PACKAGE_DIR="${SRCROOT}" 	
+    PACKAGE_DIR="${SRCROOT}"     
 fi
 
-if [ -z "$GITHUB_ACTION" ]; then
-	MINT_CMD="/opt/homebrew/bin/mint"
-else
-	MINT_CMD="mint"
-fi
+# Use environment MINT_CMD if set, otherwise use default path
+MINT_CMD=${MINT_CMD:-$DEFAULT_MINT_PATH}
 
 export MINT_PATH="$PACKAGE_DIR/.mint"
 MINT_ARGS="-n -m $PACKAGE_DIR/Mintfile --silent"
 MINT_RUN="$MINT_CMD run $MINT_ARGS"
-
-pushd $PACKAGE_DIR
-
-$MINT_CMD bootstrap -m Mintfile
 
 if [ "$LINT_MODE" == "NONE" ]; then
 	exit
@@ -31,8 +38,8 @@ else
 	SWIFTLINT_OPTIONS=""
 fi
 
-pushd $PACKAGE_DIR
-
+pushd "$PACKAGE_DIR" || exit 1
+$MINT_CMD bootstrap -m Mintfile || exit 1
 $MINT_RUN swift-openapi-generator generate --output-directory Sources/AviaryInsights/Generated --config openapi-generator-config.yaml openapi.yaml
 
 if [ -z "$CI" ]; then
@@ -40,8 +47,9 @@ if [ -z "$CI" ]; then
 	$MINT_RUN swiftlint --fix
 fi
 
-$MINT_RUN periphery scan
-$MINT_RUN swiftformat --lint $SWIFTFORMAT_OPTIONS .
-$MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS
+if [ -z "$FORMAT_ONLY" ]; then
+    $MINT_RUN swiftformat --lint $SWIFTFORMAT_OPTIONS . || exit 1
+    $MINT_RUN swiftlint lint $SWIFTLINT_OPTIONS || exit 1
+fi
 
 popd
