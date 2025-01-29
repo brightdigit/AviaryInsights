@@ -119,6 +119,7 @@ excluded:
   - .build
   - .swiftpm
   - Sources/AviaryInsights/Generated
+  - Mint
 indentation_width:
   indentation_width: 2
 file_name:
