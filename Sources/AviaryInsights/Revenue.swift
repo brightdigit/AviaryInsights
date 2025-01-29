@@ -44,3 +44,15 @@ public struct Revenue: Sendable {
     self.amount = amount
   }
 }
+
+extension Operations.post_sol_event.Input.Body.jsonPayload.revenuePayload {
+  internal init?(revenue: Revenue?) {
+    guard let revenue else {
+      return nil
+    }
+    self.init(
+      currency: revenue.currency,
+      amount: revenue.amount
+    )
+  }
+}
