@@ -4,6 +4,8 @@ on:
     branches-ignore:
       - '*WIP'
 
+env:
+  PACKAGE_NAME: AviaryInsights     
 jobs:
   build-ubuntu:
     name: Build on Ubuntu
@@ -126,7 +128,7 @@ jobs:
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
           osVersion: ${{ matrix.osVersion }}
-
+          scheme: ${{ env.PACKAGE_NAME }}
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
         with:
