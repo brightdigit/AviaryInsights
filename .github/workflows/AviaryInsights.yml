@@ -4,235 +4,147 @@ on:
     branches-ignore:
       - '*WIP'
 
+env:
+  PACKAGE_NAME: AviaryInsights     
 jobs:
   build-ubuntu:
     name: Build on Ubuntu
-    env:
-      PACKAGE_NAME: AviaryInsights
-      SWIFT_VER: ${{ matrix.swift-version }}
-    runs-on: ${{ matrix.runs-on }}
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    runs-on: ubuntu-latest
+    container: swift:${{ matrix.swift-version }}-${{ matrix.os }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       matrix:
-        runs-on: [ubuntu-20.04, ubuntu-22.04]
-        swift-version: [5.9, "5.10", "6.0"]
+        os: ["noble", "jammy", "focal"]
+        swift-version: ["6.0", "5.10", "5.9"]
+        exclude:
+          - os: "noble"
+            swift-version: "5.9"
     steps:
       - uses: actions/checkout@v4
-      - name: Cache swift package modules
-        id: cache-spm-linux
-        uses: actions/cache@v4
-        env:
-          cache-name: SPM
+      - uses: brightdigit/swift-build@v1
+      - name: Process Coverage
+        uses: sersoft-gmbh/swift-coverage-action@v4
         with:
-          path: .build
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ env.SWIFT_VER }}-${{ hashFiles('Package.resolved') }}-${{ env.RELEASE_DOT }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ runner.os }}-${{ env.SWIFT_VER }}-${{ hashFiles('Package.resolved') }}
-            ${{ env.cache-name }}-${{ runner.os }}-${{ env.SWIFT_VER }}
-      - name: Set Ubuntu Release DOT
-        run: echo "RELEASE_DOT=$(lsb_release -sr)" >> $GITHUB_ENV
-      - name: Set Ubuntu Release NUM
-        run: echo "RELEASE_NUM=${RELEASE_DOT//[-._]/}"  >> $GITHUB_ENV
-      - name: Set Ubuntu Codename
-        run: echo "RELEASE_NAME=$(lsb_release -sc)"  >> $GITHUB_ENV
-      - name: Cache swift
-        id: cache-swift-linux
-        uses: actions/cache@v4
-        env:
-          cache-name: swift
-        with:
-          path: swift-${{ env.SWIFT_VER }}-RELEASE-ubuntu${{ env.RELEASE_DOT }}
-          key: ${{ env.cache-name }}-${{ runner.os }}-${{ env.SWIFT_VER }}-${{ env.RELEASE_DOT }}
-      - name: Download Swift
-        if: steps.cache-swift-linux.outputs.cache-hit != 'true'
-        run: curl -O https://download.swift.org/swift-${SWIFT_VER}-release/ubuntu${RELEASE_NUM}/swift-${SWIFT_VER}-RELEASE/swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
-      - name: Extract Swift
-        if: steps.cache-swift-linux.outputs.cache-hit != 'true'
-        run: tar xzf swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}.tar.gz
-      - name: Add Path
-        run: echo "$GITHUB_WORKSPACE/swift-${SWIFT_VER}-RELEASE-ubuntu${RELEASE_DOT}/usr/bin" >> $GITHUB_PATH
-      - name: Build
-        run: swift build
-      - name: Run tests
-        run: swift test --enable-test-discovery --enable-code-coverage
-      - name: Prepare Code Coverage
-        run: llvm-cov export -format="lcov" .build/x86_64-unknown-linux-gnu/debug/${{ env.PACKAGE_NAME }}PackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+          fail-on-empty-output: true
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: spm,${{ env.RELEASE_NAME }},${{ env.SWIFT_VER }} 
+          flags: spm,${{ matrix.os }},${{ matrix.swift-version }}
   build-macos:
     name: Build on macOS
-    env:
-      PACKAGE_NAME: AviaryInsights
-    runs-on: ${{ matrix.runs-on }}
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    runs-on: ${{ matrix.os }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
         include:
           # SPM Build Matrix
-          - runs-on: macos-14
+          - os: macos-14
             xcode: "/Applications/Xcode_15.0.1.app"
-          - runs-on: macos-14
+          - os: macos-14
             xcode: "/Applications/Xcode_15.1.app"
-          - runs-on: macos-14
+          - os: macos-14
             xcode: "/Applications/Xcode_15.2.app"
-          - runs-on: macos-15
+          - os: macos-15
             xcode: "/Applications/Xcode_16.1.app"
-          - runs-on: macos-15
+          - os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
           
           # iOS Build Matrix
           - type: ios
-            runs-on: macos-14
+            os: macos-14
             xcode: "/Applications/Xcode_15.0.1.app"
             deviceName: "iPhone 15"
-            AviaryInsightssion: "17.0.1"
+            osVersion: "17.0.1"
           - type: ios
-            runs-on: macos-14
+            os: macos-14
             xcode: "/Applications/Xcode_15.1.app"
             deviceName: "iPhone 15 Pro"
-            AviaryInsightssion: "17.2"
+            osVersion: "17.2"
           - type: ios
-            runs-on: macos-14
+            os: macos-14
             xcode: "/Applications/Xcode_15.2.app"
             deviceName: "iPhone 15 Pro Max"
-            AviaryInsightssion: "17.2"
+            osVersion: "17.2"
           - type: ios
-            runs-on: macos-15
+            os: macos-15
             xcode: "/Applications/Xcode_16.1.app"
             deviceName: "iPhone 16"
-            AviaryInsightssion: "18.1"
+            osVersion: "18.1"
           - type: ios
-            runs-on: macos-15
+            os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "iPhone 16 Pro"
-            AviaryInsightssion: "18.2"
+            osVersion: "18.2"
   
           # watchOS Build Matrix
           - type: watchos
-            runs-on: macos-14
+            os: macos-14
             xcode: "/Applications/Xcode_15.0.1.app"
             deviceName: "Apple Watch Series 9 (41mm)"
-            AviaryInsightssion: "10.0"
+            osVersion: "10.0"
           - type: watchos
-            runs-on: macos-14
+            os: macos-14
             xcode: "/Applications/Xcode_15.1.app"
             deviceName: "Apple Watch Series 9 (45mm)"
-            AviaryInsightssion: "10.2"
+            osVersion: "10.2"
           - type: watchos
-            runs-on: macos-14
+            os: macos-14
             xcode: "/Applications/Xcode_15.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            AviaryInsightssion: "10.2"
+            osVersion: "10.2"
           - type: watchos
-            runs-on: macos-15
+            os: macos-15
             xcode: "/Applications/Xcode_16.1.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            AviaryInsightssion: "11.1"
+            osVersion: "11.1"
           - type: watchos
-            runs-on: macos-15
+            os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            AviaryInsightssion: "11.2"
+            osVersion: "11.2"
     
           # visionOS Build Matrix
           - type: visionos
-            runs-on: macos-15
+            os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Vision Pro"
-            AviaryInsightssion: "2.1"
+            osVersion: "2.1"
     
           # tvOS Build Matrix
           - type: tvos
-            runs-on: macos-15
+            os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple TV 4K (3rd generation)"
-            AviaryInsightssion: "18.2"
+            osVersion: "18.2"
     
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set Xcode Name
-        run: echo "XCODE_NAME=$(basename -- ${{ matrix.xcode }} | sed 's/\.[^.]*$//' | cut -d'_' -f2)" >> $GITHUB_ENV
-      
-      - name: Setup Xcode
-        run: sudo xcode-select -s ${{ matrix.xcode }}/Contents/Developer
-    
-      - name: Set SDK and Platform
-        if: matrix.type
-        run: |
-          case ${{ matrix.type }} in
-            ios)
-              echo "PLATFORM=iOS Simulator" >> $GITHUB_ENV
-              echo "SDK=iphonesimulator" >> $GITHUB_ENV
-              ;;
-            watchos)
-              echo "PLATFORM=watchOS Simulator" >> $GITHUB_ENV
-              echo "SDK=watchsimulator" >> $GITHUB_ENV
-              ;;
-            visionos)
-              echo "PLATFORM=visionOS Simulator" >> $GITHUB_ENV
-              echo "SDK=xrsimulator" >> $GITHUB_ENV
-              ;;
-            tvos)
-              echo "PLATFORM=tvOS Simulator" >> $GITHUB_ENV
-              echo "SDK=appletvsimulator" >> $GITHUB_ENV
-              ;;
-            esac
-      - uses: irgaly/xcode-cache@v1
-        if: matrix.type
+      - name: Build and Test
+        uses: brightdigit/swift-build@v1
         with:
-          key: xcode-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-${{ hashFiles('Package.resolved') }}-${{ github.sha }}
-          restore-keys: |
-            xcode-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-${{ hashFiles('Package.resolved') }}-                        
-            xcode-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-          
-      - name: Cache swift package modules
-        id: cache-spm-macos
-        if: "!matrix.type"
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-spm
-        with:
-          path: .build
-          key: spm-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-${{ hashFiles('Package.resolved') }}
-          restore-keys: |
-            spm-${{ runner.os }}-${{ matrix.runs-on }}-${{ env.XCODE_NAME }}-
-  
-      - name: Build SPM
-        if: "!matrix.type"
-        run: swift build
-  
-      - name: Run Swift Package tests
-        if: "!matrix.type"
-        run: swift test -v --enable-code-coverage
-  
-      # Common iOS/watchOS Test Steps
-      - name: Run Device Tests
-        if: matrix.type
-        run: >
-          xcodebuild test
-          -scheme ${{ env.PACKAGE_NAME }}
-          -sdk ${{ env.SDK }}
-          -destination 'platform=${{ env.PLATFORM }},name=${{ matrix.deviceName }},OS=${{ matrix.AviaryInsightssion }}'
-          -enableCodeCoverage YES
-  
-      # Common Coverage Steps
+          type: ${{ matrix.type }}
+          xcode: ${{ matrix.xcode }}
+          deviceName: ${{ matrix.deviceName }}
+          osVersion: ${{ matrix.osVersion }}
+          scheme: ${{ env.PACKAGE_NAME }}
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
         with:
           fail-on-empty-output: true
-  
+          search-paths: |
+            ./.build
+            /Users/runner/work/_temp/DerivedData
       - name: Upload Coverage
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.AviaryInsightssion) || 'spm' }}
+          flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
+
   lint:
     name: Linting
-    if: "!contains(github.event.head_commit.message, 'ci skip')"  
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}  
     runs-on: ubuntu-latest
     needs: [build-ubuntu, build-macos]
     env:
