@@ -77,7 +77,7 @@ internal final actor MockTransport: ClientTransport {
   ) async throws -> (HTTPResponse, HTTPBody?) {
     var bodyData: Data?
     if let body {
-      var bytes = [UInt8]()
+      var bytes: [UInt8] = []
       for try await chunk in body { bytes.append(contentsOf: chunk) }
       bodyData = Data(bytes)
     }

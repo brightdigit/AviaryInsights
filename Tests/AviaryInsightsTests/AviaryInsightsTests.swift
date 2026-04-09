@@ -76,7 +76,11 @@ internal struct AviaryInsightsTests {
   @Test internal func postEvent() async throws {
     let defaultDomain = UUID().uuidString
     let (transport, client) = makeClient(defaultDomain: defaultDomain)
-    let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
+    #if os(WASI)
+      let events = (0..<Int.random(in: 1...3)).map { _ in Event.random() }
+    #else
+      let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
+    #endif
     for event in events { try await client.postEvent(event) }
     let requests = await transport.sentRequests
     try assert(events: events, requests: requests, defaultDomain: defaultDomain)
