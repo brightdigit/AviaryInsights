@@ -31,6 +31,7 @@ if [ -z "$CI" ]; then
 	bash "$SCRIPT_DIR/header.sh" "$PACKAGE_DIR/Tests"
 	mise exec -- swift-format format --in-place --recursive .
 	mise exec -- swiftlint --fix
+	mise exec -- periphery scan
 fi
 
 if [ -z "$FORMAT_ONLY" ]; then

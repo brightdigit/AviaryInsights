@@ -2,7 +2,7 @@
 experimental = true
 
 [tools]
-swiftlint = "0.58.0"
+swiftlint = "0.63.2"
 "spm:apple/swift-format" = "602.0.0"
 "spm:apple/swift-openapi-generator" = "1.11.1"
-periphery = "2.18.0"
+periphery = {version = "3.7.2", os = ["macos"]}

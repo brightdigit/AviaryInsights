@@ -73,6 +73,31 @@ internal struct AviaryInsightsTests {
     }
   }
 
+  @Test internal func postEventFireAndForget() async throws {
+    let defaultDomain = UUID().uuidString
+    let (transport, client) = makeClient(defaultDomain: defaultDomain)
+    let event = Event.random()
+    let syncPostEvent: (Event) -> Void = client.postEvent
+    syncPostEvent(event)
+    try await Task.sleep(for: .milliseconds(100))
+    let requests = await transport.sentRequests
+    try assert(events: [event], requests: requests, defaultDomain: defaultDomain)
+  }
+
+  @Test internal func postEventFireAndForgetError() async throws {
+    let transport = MockTransport {
+      .init(response: .init(status: .badRequest), body: nil)
+    }
+    let client = Plausible(
+      transport: transport,
+      defaultDomain: UUID().uuidString,
+      userAgent: UUID().uuidString
+    )
+    let syncPostEvent: (Event) -> Void = client.postEvent
+    syncPostEvent(.random())
+    try await Task.sleep(for: .milliseconds(100))
+  }
+
   @Test internal func postEvent() async throws {
     let defaultDomain = UUID().uuidString
     let (transport, client) = makeClient(defaultDomain: defaultDomain)
