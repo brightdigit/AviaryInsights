@@ -12,7 +12,7 @@ if [[ -z "$DIRECTORY" || ! -d "$DIRECTORY" ]]; then
   exit 1
 fi
 
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PACKAGE_DIR="${SCRIPT_DIR}/.."
 LICENSE_FILE="$PACKAGE_DIR/LICENSE"
 
@@ -56,7 +56,7 @@ add_header() {
 
 has_header() {
   local file="$1"
-  head -1 "$file" | grep -q "^//"
+  head -40 "$file" | grep -q "Permission is hereby granted, free of charge"
 }
 
 while IFS= read -r -d '' file; do

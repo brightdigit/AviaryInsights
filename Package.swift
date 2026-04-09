@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -20,7 +20,7 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
+    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.2"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
   ],
   targets: [
@@ -42,14 +42,6 @@ let package = Package(
         SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
         SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
         SwiftSetting.enableExperimentalFeature("StrictConcurrency"),
-        .unsafeFlags(
-          ["-Xcc", "-D_WASI_EMULATED_SIGNAL", "-Xcc", "-D_WASI_EMULATED_MMAN"],
-          .when(platforms: [.wasi])
-        ),
-      ],
-      linkerSettings: [
-        .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
-        .linkedLibrary("wasi-emulated-mman", .when(platforms: [.wasi])),
       ]
     ),
     .testTarget(

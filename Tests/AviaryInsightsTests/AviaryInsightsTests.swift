@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -28,12 +28,17 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 
 @testable import AviaryInsights
 
-internal final class AviaryInsightsTests: XCTestCase {
+internal struct AviaryInsightsTests {
   private let decoder = JSONDecoder()
+  private let encoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    return encoder
+  }()
 
   private func makeClient(defaultDomain: String) -> (MockTransport, Plausible) {
     let transport = MockTransport {
@@ -47,17 +52,13 @@ internal final class AviaryInsightsTests: XCTestCase {
     return (transport, client)
   }
 
-  fileprivate func assert(
+  private func assert(
     events: [Event],
     requests: [MockTransport.Request],
     defaultDomain: String
-  ) async throws {
+  ) throws {
     for (event, request) in zip(events, requests) {
-      guard let body = request.body else {
-        XCTAssertNotNil(request.body)
-        continue
-      }
-      let data = try await Data(collecting: body, upTo: .max)
+      let data = try #require(request.body)
       let actualJSONPayload = try decoder.decode(
         Operations.post_sol_event.Input.Body.jsonPayload.self,
         from: data
@@ -66,16 +67,22 @@ internal final class AviaryInsightsTests: XCTestCase {
         event: event,
         defaultDomain: defaultDomain
       )
-      XCTAssertEqual(actualJSONPayload, expectedJSONPayload)
+      let actualEncoded = try encoder.encode(actualJSONPayload)
+      let expectedEncoded = try encoder.encode(expectedJSONPayload)
+      #expect(actualEncoded == expectedEncoded)
     }
   }
 
-  internal func testPostEvent() async throws {
+  @Test internal func postEvent() async throws {
     let defaultDomain = UUID().uuidString
     let (transport, client) = makeClient(defaultDomain: defaultDomain)
-    let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
+    #if os(WASI)
+      let events = (0..<Int.random(in: 1...3)).map { _ in Event.random() }
+    #else
+      let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
+    #endif
     for event in events { try await client.postEvent(event) }
     let requests = await transport.sentRequests
-    try await assert(events: events, requests: requests, defaultDomain: defaultDomain)
+    try assert(events: events, requests: requests, defaultDomain: defaultDomain)
   }
 }

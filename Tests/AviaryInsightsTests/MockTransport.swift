@@ -34,17 +34,17 @@ import OpenAPIRuntime
 internal final actor MockTransport: ClientTransport {
   // periphery:ignore
   internal struct Request {
-    internal init(request: HTTPRequest, body: HTTPBody? = nil, baseURL: URL, operationID: String) {
+    private let request: HTTPRequest
+    internal let body: Data?
+    private let baseURL: URL
+    private let operationID: String
+
+    internal init(request: HTTPRequest, body: Data? = nil, baseURL: URL, operationID: String) {
       self.request = request
       self.body = body
       self.baseURL = baseURL
       self.operationID = operationID
     }
-
-    private let request: HTTPRequest
-    internal let body: HTTPBody?
-    private let baseURL: URL
-    private let operationID: String
   }
 
   internal struct Response {
@@ -75,8 +75,14 @@ internal final actor MockTransport: ClientTransport {
     baseURL: URL,
     operationID: String
   ) async throws -> (HTTPResponse, HTTPBody?) {
+    var bodyData: Data?
+    if let body {
+      var bytes: [UInt8] = []
+      for try await chunk in body { bytes.append(contentsOf: chunk) }
+      bodyData = Data(bytes)
+    }
     sentRequests.append(
-      .init(request: request, body: body, baseURL: baseURL, operationID: operationID)
+      .init(request: request, body: bodyData, baseURL: baseURL, operationID: operationID)
     )
     return nextResponse().tuple()
   }

@@ -6,6 +6,7 @@ if [ -z "$SRCROOT" ]; then
     SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
     PACKAGE_DIR="${SCRIPT_DIR}/.."
 else
+    SCRIPT_DIR="${SRCROOT}/Scripts"
     PACKAGE_DIR="${SRCROOT}"
 fi
 
