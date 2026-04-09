@@ -34,6 +34,11 @@ import Testing
 
 internal struct AviaryInsightsTests {
   private let decoder = JSONDecoder()
+  private let encoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    return encoder
+  }()
 
   private func makeClient(defaultDomain: String) -> (MockTransport, Plausible) {
     let transport = MockTransport {
@@ -63,7 +68,9 @@ internal struct AviaryInsightsTests {
         event: event,
         defaultDomain: defaultDomain
       )
-      #expect(actualJSONPayload == expectedJSONPayload)
+      let actualEncoded = try encoder.encode(actualJSONPayload)
+      let expectedEncoded = try encoder.encode(expectedJSONPayload)
+      #expect(actualEncoded == expectedEncoded)
     }
   }
 
