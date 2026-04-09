@@ -34,12 +34,12 @@ let package = Package(
         ),
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
       ],
-      swiftSettings: [
-        SwiftSetting.enableUpcomingFeature("ExistentialAny"),
-      ],
       cSettings: [
         .define("_WASI_EMULATED_SIGNAL", .when(platforms: [.wasi])),
         .define("_WASI_EMULATED_MMAN", .when(platforms: [.wasi])),
+      ],
+      swiftSettings: [
+        SwiftSetting.enableUpcomingFeature("ExistentialAny"),
       ],
       linkerSettings: [
         .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
