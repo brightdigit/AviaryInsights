@@ -90,12 +90,16 @@ jobs:
         uses: brightdigit/swift-build@v1
         with:
           type: ${{ matrix.type }}
-          # wasmtime-version: "40.0.2"
           wasm-swift-flags: >-
             -Xcc -D_WASI_EMULATED_SIGNAL
             -Xcc -D_WASI_EMULATED_MMAN
             -Xlinker -lwasi-emulated-signal
             -Xlinker -lwasi-emulated-mman
+      - name: Install curl for Codecov
+        if: steps.build.outputs.contains-code-coverage == 'true'
+        run: |
+          apt-get update
+          apt-get install -y curl            
       - name: Process Coverage
         if: ${{ steps.build.outputs.contains-code-coverage == 'true' }}
         uses: sersoft-gmbh/swift-coverage-action@v5
