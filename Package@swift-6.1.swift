@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -20,8 +20,8 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.2"),
+    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.11.0", traits: []),
+    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.2.0"),
   ],
   targets: [
     .target(
@@ -35,13 +35,7 @@ let package = Package(
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
       ],
       swiftSettings: [
-        SwiftSetting.enableUpcomingFeature("BareSlashRegexLiterals"),
-        SwiftSetting.enableUpcomingFeature("ConciseMagicFile"),
         SwiftSetting.enableUpcomingFeature("ExistentialAny"),
-        SwiftSetting.enableUpcomingFeature("ForwardTrailingClosures"),
-        SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
-        SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
-        SwiftSetting.enableExperimentalFeature("StrictConcurrency"),
         .unsafeFlags(
           ["-Xcc", "-D_WASI_EMULATED_SIGNAL", "-Xcc", "-D_WASI_EMULATED_MMAN"],
           .when(platforms: [.wasi])
