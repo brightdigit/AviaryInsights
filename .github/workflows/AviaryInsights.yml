@@ -209,7 +209,7 @@ jobs:
             os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "iPhone 16 Pro"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
 
           # macOS 26 watchOS Build
@@ -217,7 +217,7 @@ jobs:
             os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
 
           # macOS 26 visionOS Build
@@ -225,7 +225,7 @@ jobs:
             os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
 
           # macOS 26 tvOS Build
@@ -233,7 +233,7 @@ jobs:
             os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "26.0"
+            osVersion: "26.4"
             download-platform: true
 
     steps:
