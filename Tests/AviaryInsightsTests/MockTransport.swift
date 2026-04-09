@@ -34,17 +34,17 @@ import OpenAPIRuntime
 internal final actor MockTransport: ClientTransport {
   // periphery:ignore
   internal struct Request {
+    private let request: HTTPRequest
+    internal let body: Data?
+    private let baseURL: URL
+    private let operationID: String
+
     internal init(request: HTTPRequest, body: Data? = nil, baseURL: URL, operationID: String) {
       self.request = request
       self.body = body
       self.baseURL = baseURL
       self.operationID = operationID
     }
-
-    private let request: HTTPRequest
-    internal let body: Data?
-    private let baseURL: URL
-    private let operationID: String
   }
 
   internal struct Response {

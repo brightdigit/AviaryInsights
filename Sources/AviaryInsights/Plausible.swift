@@ -48,7 +48,7 @@ import OpenAPIRuntime
 /// The domain is a string that identifies your application, typically the bundle identifier of your app.
 ///
 /// ```swift
-/// let plausible = Plausible(domain: "com.example.yourApp", userAgent: "MyApp/1.0")
+/// let plausible = Plausible(defaultDomain: "com.example.yourApp", userAgent: "MyApp/1.0")
 /// ```
 /// By default ``Plausible`` uses a
 /// [`URLSessionTransport`](https://github.com/apple/swift-openapi-urlsession),
@@ -122,12 +122,11 @@ public struct Plausible: Sendable {
   }
 
   #if canImport(OpenAPIURLSession)
-    /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
+    /// Initializes a Plausible instance using the default `URLSessionTransport`.
     /// - Parameters:
     ///   - defaultDomain: Default domain associated with the Plausible instance.
     ///   - userAgent: User-Agent string for visitor identification.
     ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-    ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
     public init(
       defaultDomain: String,
       userAgent: String,

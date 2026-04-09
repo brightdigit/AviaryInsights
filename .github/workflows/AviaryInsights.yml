@@ -257,9 +257,6 @@ jobs:
             build: 6.1-RELEASE
     steps:
       - uses: actions/checkout@v4
-      - name: Enable git symlinks
-        shell: pwsh
-        run: git config --global core.symlinks true
       - uses: brightdigit/swift-build@v1
         with:
           windows-swift-version: ${{ matrix.swift.version }}
@@ -267,7 +264,7 @@ jobs:
 
   lint:
     name: Linting
-    if: ${{ !cancelled() && !failure() }}
+    if: ${{ always() && !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     needs: [build-ubuntu, build-macos, build-android, build-windows]
     steps:
