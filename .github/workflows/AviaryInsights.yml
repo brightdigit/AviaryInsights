@@ -29,6 +29,7 @@ jobs:
     name: Configure Matrix
     runs-on: ubuntu-latest
     outputs:
+      full-matrix: ${{ steps.matrix.outputs.full-matrix }}
       ubuntu-os: ${{ steps.matrix.outputs.ubuntu-os }}
       ubuntu-swift: ${{ steps.matrix.outputs.ubuntu-swift }}
       ubuntu-type: ${{ steps.matrix.outputs.ubuntu-type }}
@@ -56,10 +57,12 @@ jobs:
         name: Build matrix values
         run: |
           if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
+            echo 'full-matrix=true' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
-            echo 'ubuntu-swift=[{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=[{"version":"6.1"},{"version":"6.2"},{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-type=["","wasm","wasm-embedded"]' >> "$GITHUB_OUTPUT"
           else
+            echo 'full-matrix=false' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-swift=[{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
             echo 'ubuntu-type=[""]' >> "$GITHUB_OUTPUT"
@@ -76,6 +79,11 @@ jobs:
         os: ${{ fromJSON(needs.configure.outputs.ubuntu-os) }}
         swift: ${{ fromJSON(needs.configure.outputs.ubuntu-swift) }}
         type: ${{ fromJSON(needs.configure.outputs.ubuntu-type) }}
+        exclude:
+          - swift: {version: "6.1"}
+            type: wasm
+          - swift: {version: "6.1"}
+            type: wasm-embedded
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1
@@ -118,26 +126,31 @@ jobs:
             xcode: "/Applications/Xcode_15.0.1.app"
             deviceName: "iPhone 15"
             osVersion: "17.0.1"
+            download-platform: true
           - type: ios
             os: macos-14
             xcode: "/Applications/Xcode_15.1.app"
             deviceName: "iPhone 15 Pro"
             osVersion: "17.2"
+            download-platform: true
           - type: ios
             os: macos-14
             xcode: "/Applications/Xcode_15.2.app"
             deviceName: "iPhone 15 Pro Max"
             osVersion: "17.2"
+            download-platform: true
           - type: ios
             os: macos-15
             xcode: "/Applications/Xcode_16.1.app"
             deviceName: "iPhone 16"
             osVersion: "18.1"
+            download-platform: true
           - type: ios
             os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "iPhone 16 Pro"
             osVersion: "18.2"
+            download-platform: true
 
           # watchOS Build Matrix
           - type: watchos
@@ -145,26 +158,31 @@ jobs:
             xcode: "/Applications/Xcode_15.0.1.app"
             deviceName: "Apple Watch Series 9 (41mm)"
             osVersion: "10.0"
+            download-platform: true
           - type: watchos
             os: macos-14
             xcode: "/Applications/Xcode_15.1.app"
             deviceName: "Apple Watch Series 9 (45mm)"
             osVersion: "10.2"
+            download-platform: true
           - type: watchos
             os: macos-14
             xcode: "/Applications/Xcode_15.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
             osVersion: "10.2"
+            download-platform: true
           - type: watchos
             os: macos-15
             xcode: "/Applications/Xcode_16.1.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
             osVersion: "11.1"
+            download-platform: true
           - type: watchos
             os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
             osVersion: "11.2"
+            download-platform: true
 
           # visionOS Build Matrix
           - type: visionos
@@ -172,6 +190,7 @@ jobs:
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Vision Pro"
             osVersion: "2.1"
+            download-platform: true
 
           # tvOS Build Matrix
           - type: tvos
@@ -179,6 +198,7 @@ jobs:
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple TV 4K (3rd generation)"
             osVersion: "18.2"
+            download-platform: true
 
           # macOS 26 / Xcode 26.4 SPM Build
           - os: macos-26
@@ -190,6 +210,7 @@ jobs:
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "iPhone 16 Pro"
             osVersion: "26.0"
+            download-platform: true
 
           # macOS 26 watchOS Build
           - type: watchos
@@ -197,6 +218,7 @@ jobs:
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
             osVersion: "26.0"
+            download-platform: true
 
           # macOS 26 visionOS Build
           - type: visionos
@@ -204,6 +226,7 @@ jobs:
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple Vision Pro"
             osVersion: "26.0"
+            download-platform: true
 
           # macOS 26 tvOS Build
           - type: tvos
@@ -211,6 +234,7 @@ jobs:
             xcode: "/Applications/Xcode_26.4.app"
             deviceName: "Apple TV 4K (3rd generation)"
             osVersion: "26.0"
+            download-platform: true
 
     steps:
       - uses: actions/checkout@v4
@@ -221,6 +245,7 @@ jobs:
           xcode: ${{ matrix.xcode }}
           deviceName: ${{ matrix.deviceName }}
           osVersion: ${{ matrix.osVersion }}
+          download-platform: ${{ matrix.download-platform }}
           scheme: ${{ env.PACKAGE_NAME }}
       - name: Process Coverage
         uses: sersoft-gmbh/swift-coverage-action@v4
@@ -237,22 +262,54 @@ jobs:
 
   build-android:
     name: Build on Android
+    needs: [configure]
+    if: needs.configure.outputs.full-matrix == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift:
+          - version: "6.2"
+          - version: "6.3"
+        android-api-level: [33, 34, 35, 36]
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1
         with:
           type: android
+          android-swift-version: ${{ matrix.swift.version }}
+          android-api-level: ${{ matrix.android-api-level }}
+          android-run-tests: true
 
   build-windows:
     name: Build on Windows
-    runs-on: windows-latest
+    needs: [configure]
+    if: needs.configure.outputs.full-matrix == 'true'
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [windows-2022, windows-2025]
+        swift:
+          - version: swift-6.3-release
+            build: 6.3-RELEASE
+          - version: swift-6.2-release
+            build: 6.2-RELEASE
+          - version: swift-6.1-release
+            build: 6.1-RELEASE
     steps:
       - uses: actions/checkout@v4
+      - name: Enable git symlinks
+        shell: pwsh
+        run: git config --global core.symlinks true
       - uses: brightdigit/swift-build@v1
+        with:
+          windows-swift-version: ${{ matrix.swift.version }}
+          windows-swift-build: ${{ matrix.swift.build }}
 
   lint:
     name: Linting
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-latest
     needs: [build-ubuntu, build-macos, build-android, build-windows]
     steps:
