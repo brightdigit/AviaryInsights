@@ -109,95 +109,39 @@ jobs:
       matrix:
         include:
           # SPM Build Matrix
-          - os: macos-14
-            xcode: "/Applications/Xcode_15.0.1.app"
-          - os: macos-14
-            xcode: "/Applications/Xcode_15.1.app"
-          - os: macos-14
-            xcode: "/Applications/Xcode_15.2.app"
           - os: macos-15
-            xcode: "/Applications/Xcode_16.1.app"
-          - os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
 
           # iOS Build Matrix
           - type: ios
-            os: macos-14
-            xcode: "/Applications/Xcode_15.0.1.app"
-            deviceName: "iPhone 15"
-            osVersion: "17.0.1"
-            download-platform: true
-          - type: ios
-            os: macos-14
-            xcode: "/Applications/Xcode_15.1.app"
-            deviceName: "iPhone 15 Pro"
-            osVersion: "17.2"
-            download-platform: true
-          - type: ios
-            os: macos-14
-            xcode: "/Applications/Xcode_15.2.app"
-            deviceName: "iPhone 15 Pro Max"
-            osVersion: "17.2"
-            download-platform: true
-          - type: ios
             os: macos-15
-            xcode: "/Applications/Xcode_16.1.app"
-            deviceName: "iPhone 16"
-            osVersion: "18.1"
-            download-platform: true
-          - type: ios
-            os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "iPhone 16 Pro"
-            osVersion: "18.2"
+            osVersion: "18.4"
             download-platform: true
 
           # watchOS Build Matrix
           - type: watchos
-            os: macos-14
-            xcode: "/Applications/Xcode_15.0.1.app"
-            deviceName: "Apple Watch Series 9 (41mm)"
-            osVersion: "10.0"
-            download-platform: true
-          - type: watchos
-            os: macos-14
-            xcode: "/Applications/Xcode_15.1.app"
-            deviceName: "Apple Watch Series 9 (45mm)"
-            osVersion: "10.2"
-            download-platform: true
-          - type: watchos
-            os: macos-14
-            xcode: "/Applications/Xcode_15.2.app"
-            deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "10.2"
-            download-platform: true
-          - type: watchos
             os: macos-15
-            xcode: "/Applications/Xcode_16.1.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.1"
-            download-platform: true
-          - type: watchos
-            os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
-            deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.2"
+            osVersion: "11.4"
             download-platform: true
 
           # visionOS Build Matrix
           - type: visionos
             os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "2.1"
+            osVersion: "2.4"
             download-platform: true
 
           # tvOS Build Matrix
           - type: tvos
             os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "18.2"
+            osVersion: "18.4"
             download-platform: true
 
           # macOS 26 / Xcode 26.4 SPM Build
@@ -208,7 +152,7 @@ jobs:
           - type: ios
             os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "iPhone 16 Pro"
+            deviceName: "iPhone 17"
             osVersion: "26.4"
             download-platform: true
 
@@ -216,7 +160,7 @@ jobs:
           - type: watchos
             os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
-            deviceName: "Apple Watch Ultra 2 (49mm)"
+            deviceName: "Apple Watch Ultra 3 (49mm)"
             osVersion: "26.4"
             download-platform: true
 
