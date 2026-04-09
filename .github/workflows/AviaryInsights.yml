@@ -108,100 +108,52 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # SPM Build Matrix
-          - os: macos-14
-            xcode: "/Applications/Xcode_15.0.1.app"
-          - os: macos-14
-            xcode: "/Applications/Xcode_15.1.app"
-          - os: macos-14
-            xcode: "/Applications/Xcode_15.2.app"
+          # macOS 15 / Xcode 16.4 SPM Build
           - os: macos-15
-            xcode: "/Applications/Xcode_16.1.app"
-          - os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
 
-          # iOS Build Matrix
-          - type: ios
-            os: macos-14
-            xcode: "/Applications/Xcode_15.0.1.app"
-            deviceName: "iPhone 15"
-            osVersion: "17.0.1"
-            download-platform: true
-          - type: ios
-            os: macos-14
-            xcode: "/Applications/Xcode_15.1.app"
-            deviceName: "iPhone 15 Pro"
-            osVersion: "17.2"
-            download-platform: true
-          - type: ios
-            os: macos-14
-            xcode: "/Applications/Xcode_15.2.app"
-            deviceName: "iPhone 15 Pro Max"
-            osVersion: "17.2"
-            download-platform: true
+          - type: macos
+            os: macos-15
+            xcode: "/Applications/Xcode_16.4.app"
+
+          # macOS 15 iOS Build
           - type: ios
             os: macos-15
-            xcode: "/Applications/Xcode_16.1.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "iPhone 16"
-            osVersion: "18.1"
-            download-platform: true
-          - type: ios
-            os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
-            deviceName: "iPhone 16 Pro"
-            osVersion: "18.2"
+            osVersion: "18.5"
             download-platform: true
 
-          # watchOS Build Matrix
-          - type: watchos
-            os: macos-14
-            xcode: "/Applications/Xcode_15.0.1.app"
-            deviceName: "Apple Watch Series 9 (41mm)"
-            osVersion: "10.0"
-            download-platform: true
-          - type: watchos
-            os: macos-14
-            xcode: "/Applications/Xcode_15.1.app"
-            deviceName: "Apple Watch Series 9 (45mm)"
-            osVersion: "10.2"
-            download-platform: true
-          - type: watchos
-            os: macos-14
-            xcode: "/Applications/Xcode_15.2.app"
-            deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "10.2"
-            download-platform: true
+          # macOS 15 watchOS Build
           - type: watchos
             os: macos-15
-            xcode: "/Applications/Xcode_16.1.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.1"
-            download-platform: true
-          - type: watchos
-            os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
-            deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.2"
+            osVersion: "11.5"
             download-platform: true
 
-          # visionOS Build Matrix
+          # macOS 15 visionOS Build
           - type: visionos
             os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Vision Pro"
             osVersion: "2.5"
             download-platform: true
 
-          # tvOS Build Matrix
+          # macOS 15 tvOS Build
           - type: tvos
             os: macos-15
-            xcode: "/Applications/Xcode_16.2.app"
+            xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "18.2"
+            osVersion: "18.5"
             download-platform: true
 
           # macOS 26 / Xcode 26.4 SPM Build
           - os: macos-26
+            xcode: "/Applications/Xcode_26.4.app"
+
+          - type: macos
+            os: macos-26
             xcode: "/Applications/Xcode_26.4.app"
 
           # macOS 26 iOS Build
