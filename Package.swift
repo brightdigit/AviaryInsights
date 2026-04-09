@@ -57,6 +57,17 @@ let package = Package(
       dependencies: [
         "AviaryInsights",
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+      ],
+      swiftSettings: [
+        .unsafeFlags(
+          ["-Xcc", "-D_WASI_EMULATED_SIGNAL", "-Xcc", "-D_WASI_EMULATED_MMAN"],
+          .when(platforms: [.wasi])
+        )
+      ],
+      linkerSettings: [
+        .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
+        .linkedLibrary("wasi-emulated-mman", .when(platforms: [.wasi])),
+        .unsafeFlags(["-z", "stack-size=8388608"], .when(platforms: [.wasi])),
       ]
     ),
   ]
