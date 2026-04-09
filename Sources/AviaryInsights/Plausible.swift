@@ -29,7 +29,10 @@
 
 import Foundation
 import OpenAPIRuntime
-import OpenAPIURLSession
+
+#if canImport(OpenAPIURLSession)
+  import OpenAPIURLSession
+#endif
 
 #if canImport(FoundationNetworking)
   import FoundationNetworking
@@ -118,51 +121,66 @@ public struct Plausible: Sendable {
     self.init(client: client, defaultDomain: defaultDomain, userAgent: userAgent)
   }
 
-  /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
-  /// - Parameters:
-  ///   - defaultDomain: Default domain associated with the Plausible instance.
-  ///   - userAgent: User-Agent string for visitor identification.
-  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-  ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
-  public init(
-    defaultDomain: String,
-    userAgent: String,
-    serverURL: URL = Self.defaultServerURL,
-    configuration: URLSessionTransport.Configuration? = nil
-  ) {
-    let transport: URLSessionTransport =
-      if let configuration {
-        .init(configuration: configuration)
-      } else {
-        .init()
-      }
-    self.init(
-      transport: transport,
-      defaultDomain: defaultDomain,
-      userAgent: userAgent,
-      serverURL: serverURL
-    )
-  }
+  #if canImport(OpenAPIURLSession)
+    /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
+    /// - Parameters:
+    ///   - defaultDomain: Default domain associated with the Plausible instance.
+    ///   - userAgent: User-Agent string for visitor identification.
+    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
+    public init(
+      defaultDomain: String,
+      userAgent: String,
+      serverURL: URL = Self.defaultServerURL
+    ) {
+      self.init(
+        transport: URLSessionTransport(),
+        defaultDomain: defaultDomain,
+        userAgent: userAgent,
+        serverURL: serverURL
+      )
+    }
 
-  /// Initializes a Plausible instance with a custom URLSession.
-  /// - Parameters:
-  ///   - session: URLSession to use for making requests.
-  ///   - defaultDomain: Default domain associated with the Plausible instance.
-  ///   - userAgent: User-Agent string for visitor identification.
-  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-  public init(
-    session: URLSession,
-    defaultDomain: String,
-    userAgent: String,
-    serverURL: URL = Self.defaultServerURL
-  ) {
-    self.init(
-      defaultDomain: defaultDomain,
-      userAgent: userAgent,
-      serverURL: serverURL,
-      configuration: .init(session: session)
-    )
-  }
+    /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
+    /// - Parameters:
+    ///   - defaultDomain: Default domain associated with the Plausible instance.
+    ///   - userAgent: User-Agent string for visitor identification.
+    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
+    public init(
+      defaultDomain: String,
+      userAgent: String,
+      serverURL: URL = Self.defaultServerURL,
+      configuration: URLSessionTransport.Configuration
+    ) {
+      let transport: URLSessionTransport = .init(configuration: configuration)
+      self.init(
+        transport: transport,
+        defaultDomain: defaultDomain,
+        userAgent: userAgent,
+        serverURL: serverURL
+      )
+    }
+    /// Initializes a Plausible instance with a custom URLSession.
+    /// - Parameters:
+    ///   - session: URLSession to use for making requests.
+    ///   - defaultDomain: Default domain associated with the Plausible instance.
+    ///   - userAgent: User-Agent string for visitor identification.
+    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    public init(
+      session: URLSession,
+      defaultDomain: String,
+      userAgent: String,
+      serverURL: URL = Self.defaultServerURL
+    ) {
+      self.init(
+        defaultDomain: defaultDomain,
+        userAgent: userAgent,
+        serverURL: serverURL,
+        configuration: .init(session: session)
+      )
+    }
+  #endif
 
   /// Sends an event to the Plausible API.
   /// - Parameter event: Event to be sent.
