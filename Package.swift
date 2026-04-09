@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -42,14 +42,6 @@ let package = Package(
         SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
         SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
         SwiftSetting.enableExperimentalFeature("StrictConcurrency"),
-        .unsafeFlags(
-          ["-Xcc", "-D_WASI_EMULATED_SIGNAL", "-Xcc", "-D_WASI_EMULATED_MMAN"],
-          .when(platforms: [.wasi])
-        ),
-      ],
-      linkerSettings: [
-        .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
-        .linkedLibrary("wasi-emulated-mman", .when(platforms: [.wasi])),
       ]
     ),
     .testTarget(
@@ -57,17 +49,6 @@ let package = Package(
       dependencies: [
         "AviaryInsights",
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
-      ],
-      swiftSettings: [
-        .unsafeFlags(
-          ["-Xcc", "-D_WASI_EMULATED_SIGNAL", "-Xcc", "-D_WASI_EMULATED_MMAN"],
-          .when(platforms: [.wasi])
-        )
-      ],
-      linkerSettings: [
-        .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
-        .linkedLibrary("wasi-emulated-mman", .when(platforms: [.wasi])),
-        .unsafeFlags(["-z", "stack-size=8388608"], .when(platforms: [.wasi])),
       ]
     ),
   ]

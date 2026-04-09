@@ -89,6 +89,7 @@ jobs:
       - uses: brightdigit/swift-build@v1
         with:
           type: ${{ matrix.type }}
+          wasmtime-version: "40.0.2"
           wasm-swift-flags: >-
             -Xcc -D_WASI_EMULATED_SIGNAL
             -Xcc -D_WASI_EMULATED_MMAN
