@@ -74,7 +74,6 @@ jobs:
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift.version }}-${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: ${{ fromJSON(needs.configure.outputs.ubuntu-os) }}
         swift: ${{ fromJSON(needs.configure.outputs.ubuntu-swift) }}
@@ -116,7 +115,6 @@ jobs:
     name: Build on macOS
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         include:
           # macOS 15 / Xcode 16.4 SPM Build
@@ -232,7 +230,6 @@ jobs:
     if: needs.configure.outputs.full-matrix == 'true'
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         swift:
           - version: "6.2"
@@ -253,7 +250,6 @@ jobs:
     if: needs.configure.outputs.full-matrix == 'true'
     runs-on: ${{ matrix.runs-on }}
     strategy:
-      fail-fast: false
       matrix:
         runs-on: [windows-2022, windows-2025]
         swift:
