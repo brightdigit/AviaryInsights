@@ -32,7 +32,6 @@ import HTTPTypes
 import OpenAPIRuntime
 
 internal final actor MockTransport: ClientTransport {
-  // periphery:ignore
   internal struct Request {
     private let request: HTTPRequest
     internal let body: Data?

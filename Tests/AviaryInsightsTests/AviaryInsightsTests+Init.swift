@@ -37,7 +37,7 @@ import Testing
 #endif
 
 extension AviaryInsightsTests {
-  @Test internal func initWithDefaultTransport() {
+  @Test(.enabled(if: isOpenAPIURLSessionAvailable)) internal func initWithDefaultTransport() {
     let domain = UUID().uuidString
     let agent = UUID().uuidString
     #if canImport(OpenAPIURLSession)
@@ -49,7 +49,8 @@ extension AviaryInsightsTests {
     #endif
   }
 
-  @Test internal func initWithURLSessionConfiguration() {
+  @Test(.enabled(if: isOpenAPIURLSessionAvailable)) internal func initWithURLSessionConfiguration()
+  {
     let domain = UUID().uuidString
     let agent = UUID().uuidString
     #if canImport(OpenAPIURLSession)
@@ -62,7 +63,7 @@ extension AviaryInsightsTests {
     #endif
   }
 
-  @Test internal func initWithURLSession() {
+  @Test(.enabled(if: isOpenAPIURLSessionAvailable)) internal func initWithURLSession() {
     let domain = UUID().uuidString
     let agent = UUID().uuidString
     #if canImport(OpenAPIURLSession)

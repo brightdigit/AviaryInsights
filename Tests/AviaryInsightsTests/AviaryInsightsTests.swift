@@ -33,6 +33,14 @@ import Testing
 @testable import AviaryInsights
 
 internal struct AviaryInsightsTests {
+  internal static let isOpenAPIURLSessionAvailable = {
+    #if canImport(OpenAPIURLSession)
+      true
+    #else
+      false
+    #endif
+  }()
+
   private let decoder = JSONDecoder()
   private let encoder: JSONEncoder = {
     let encoder = JSONEncoder()
