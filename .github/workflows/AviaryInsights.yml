@@ -125,7 +125,7 @@ jobs:
             os: macos-15
             xcode: "/Applications/Xcode_16.4.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
-            osVersion: "11.4"
+            osVersion: "11.5"
             download-platform: true
 
           # visionOS Build Matrix
