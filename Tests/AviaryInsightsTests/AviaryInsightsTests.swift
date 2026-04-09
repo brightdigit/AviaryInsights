@@ -56,10 +56,9 @@ internal struct AviaryInsightsTests {
     events: [Event],
     requests: [MockTransport.Request],
     defaultDomain: String
-  ) async throws {
+  ) throws {
     for (event, request) in zip(events, requests) {
-      let body = try #require(request.body)
-      let data = try await Data(collecting: body, upTo: .max)
+      let data = try #require(request.body)
       let actualJSONPayload = try decoder.decode(
         Operations.post_sol_event.Input.Body.jsonPayload.self,
         from: data
@@ -80,6 +79,6 @@ internal struct AviaryInsightsTests {
     let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
     for event in events { try await client.postEvent(event) }
     let requests = await transport.sentRequests
-    try await assert(events: events, requests: requests, defaultDomain: defaultDomain)
+    try assert(events: events, requests: requests, defaultDomain: defaultDomain)
   }
 }
