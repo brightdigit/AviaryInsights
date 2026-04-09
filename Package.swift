@@ -36,10 +36,10 @@ let package = Package(
       ],
       swiftSettings: [
         SwiftSetting.enableUpcomingFeature("ExistentialAny"),
-        .unsafeFlags(
-          ["-Xcc", "-D_WASI_EMULATED_SIGNAL", "-Xcc", "-D_WASI_EMULATED_MMAN"],
-          .when(platforms: [.wasi])
-        ),
+      ],
+      cSettings: [
+        .define("_WASI_EMULATED_SIGNAL", .when(platforms: [.wasi])),
+        .define("_WASI_EMULATED_MMAN", .when(platforms: [.wasi])),
       ],
       linkerSettings: [
         .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
@@ -51,6 +51,14 @@ let package = Package(
       dependencies: [
         "AviaryInsights",
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
+      ],
+      cSettings: [
+        .define("_WASI_EMULATED_SIGNAL", .when(platforms: [.wasi])),
+        .define("_WASI_EMULATED_MMAN", .when(platforms: [.wasi])),
+      ],
+      linkerSettings: [
+        .linkedLibrary("wasi-emulated-signal", .when(platforms: [.wasi])),
+        .linkedLibrary("wasi-emulated-mman", .when(platforms: [.wasi])),
       ]
     ),
   ]
