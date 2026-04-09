@@ -27,12 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-@testable import AviaryInsights
 import Foundation
 import XCTest
 
+@testable import AviaryInsights
+
 internal final class AviaryInsightsTests: XCTestCase {
   private let decoder = JSONDecoder()
+
+  private func makeClient(defaultDomain: String) -> (MockTransport, Plausible) {
+    let transport = MockTransport {
+      .init(response: .init(status: .accepted), body: "{}")
+    }
+    let client = Plausible(
+      transport: transport,
+      defaultDomain: defaultDomain,
+      userAgent: UUID().uuidString
+    )
+    return (transport, client)
+  }
 
   fileprivate func assert(
     events: [Event],
@@ -58,25 +71,11 @@ internal final class AviaryInsightsTests: XCTestCase {
   }
 
   internal func testPostEvent() async throws {
-    let transport = MockTransport {
-      .init(response: .init(status: .accepted), body: "{}")
-    }
-
     let defaultDomain = UUID().uuidString
-    let client = Plausible(transport: transport, defaultDomain: defaultDomain)
-    let events: [Event] = {
-      let count: Int = .random(in: 10 ... 20)
-      return (0 ..< count).map { _ in
-        Event.random()
-      }
-    }()
-
-    for event in events {
-      try await client.postEvent(event)
-    }
-
+    let (transport, client) = makeClient(defaultDomain: defaultDomain)
+    let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
+    for event in events { try await client.postEvent(event) }
     let requests = await transport.sentRequests
-
     try await assert(events: events, requests: requests, defaultDomain: defaultDomain)
   }
 }

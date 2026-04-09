@@ -1,40 +1,101 @@
 name: AviaryInsights
 on:
   push:
-    branches-ignore:
-      - '*WIP'
+    branches:
+      - main
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 env:
-  PACKAGE_NAME: AviaryInsights     
+  PACKAGE_NAME: AviaryInsights
+
 jobs:
+  configure:
+    name: Configure Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      ubuntu-os: ${{ steps.matrix.outputs.ubuntu-os }}
+      ubuntu-swift: ${{ steps.matrix.outputs.ubuntu-swift }}
+      ubuntu-type: ${{ steps.matrix.outputs.ubuntu-type }}
+    steps:
+      - id: check
+        name: Determine matrix scope
+        run: |
+          FULL=false
+          REF="${{ github.ref }}"
+          EVENT="${{ github.event_name }}"
+          BASE_REF="${{ github.base_ref }}"
+          if [[ "$REF" == "refs/heads/main" ]]; then
+            FULL=true
+          elif [[ "$REF" =~ ^refs/heads/v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            FULL=true
+          elif [[ "$EVENT" == "workflow_dispatch" ]]; then
+            FULL=true
+          elif [[ "$EVENT" == "pull_request" ]]; then
+            if [[ "$BASE_REF" == "main" || "$BASE_REF" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+              FULL=true
+            fi
+          fi
+          echo "full=$FULL" >> "$GITHUB_OUTPUT"
+      - id: matrix
+        name: Build matrix values
+        run: |
+          if [[ "${{ steps.check.outputs.full }}" == "true" ]]; then
+            echo 'ubuntu-os=["noble","jammy"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=[{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-type=["","wasm","wasm-embedded"]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ubuntu-os=["noble"]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-swift=[{"version":"6.3"}]' >> "$GITHUB_OUTPUT"
+            echo 'ubuntu-type=[""]' >> "$GITHUB_OUTPUT"
+          fi
+
   build-ubuntu:
     name: Build on Ubuntu
+    needs: configure
     runs-on: ubuntu-latest
-    container: swift:${{ matrix.swift-version }}-${{ matrix.os }}
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    container: swift:${{ matrix.swift.version }}-${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: ["noble", "jammy", "focal"]
-        swift-version: ["6.0", "5.10", "5.9"]
-        exclude:
-          - os: "noble"
-            swift-version: "5.9"
+        os: ${{ fromJSON(needs.configure.outputs.ubuntu-os) }}
+        swift: ${{ fromJSON(needs.configure.outputs.ubuntu-swift) }}
+        type: ${{ fromJSON(needs.configure.outputs.ubuntu-type) }}
     steps:
       - uses: actions/checkout@v4
       - uses: brightdigit/swift-build@v1
+        with:
+          type: ${{ matrix.type }}
       - name: Process Coverage
+        if: ${{ matrix.type == '' }}
         uses: sersoft-gmbh/swift-coverage-action@v4
         with:
           fail-on-empty-output: true
       - name: Upload coverage reports to Codecov
+        if: ${{ matrix.type == '' }}
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: spm,${{ matrix.os }},${{ matrix.swift-version }}
+          flags: spm,${{ matrix.os }},${{ matrix.swift.version }}
+
   build-macos:
     name: Build on macOS
     runs-on: ${{ matrix.os }}
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
     strategy:
       fail-fast: false
       matrix:
@@ -50,7 +111,7 @@ jobs:
             xcode: "/Applications/Xcode_16.1.app"
           - os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
-          
+
           # iOS Build Matrix
           - type: ios
             os: macos-14
@@ -77,7 +138,7 @@ jobs:
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "iPhone 16 Pro"
             osVersion: "18.2"
-  
+
           # watchOS Build Matrix
           - type: watchos
             os: macos-14
@@ -104,21 +165,53 @@ jobs:
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Watch Ultra 2 (49mm)"
             osVersion: "11.2"
-    
+
           # visionOS Build Matrix
           - type: visionos
             os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple Vision Pro"
             osVersion: "2.1"
-    
+
           # tvOS Build Matrix
           - type: tvos
             os: macos-15
             xcode: "/Applications/Xcode_16.2.app"
             deviceName: "Apple TV 4K (3rd generation)"
             osVersion: "18.2"
-    
+
+          # macOS 26 / Xcode 26.4 SPM Build
+          - os: macos-26
+            xcode: "/Applications/Xcode_26.4.app"
+
+          # macOS 26 iOS Build
+          - type: ios
+            os: macos-26
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "iPhone 16 Pro"
+            osVersion: "26.0"
+
+          # macOS 26 watchOS Build
+          - type: watchos
+            os: macos-26
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple Watch Ultra 2 (49mm)"
+            osVersion: "26.0"
+
+          # macOS 26 visionOS Build
+          - type: visionos
+            os: macos-26
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple Vision Pro"
+            osVersion: "26.0"
+
+          # macOS 26 tvOS Build
+          - type: tvos
+            os: macos-26
+            xcode: "/Applications/Xcode_26.4.app"
+            deviceName: "Apple TV 4K (3rd generation)"
+            osVersion: "26.0"
+
     steps:
       - uses: actions/checkout@v4
       - name: Build and Test
@@ -142,33 +235,31 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: ${{ matrix.type && format('{0}{1}', matrix.type, matrix.osVersion) || 'spm' }}
 
+  build-android:
+    name: Build on Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: brightdigit/swift-build@v1
+        with:
+          type: android
+
+  build-windows:
+    name: Build on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: brightdigit/swift-build@v1
+
   lint:
     name: Linting
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}  
     runs-on: ubuntu-latest
-    needs: [build-ubuntu, build-macos]
-    env:
-      MINT_PATH: .mint/lib
-      MINT_LINK_PATH: .mint/bin
+    needs: [build-ubuntu, build-macos, build-android, build-windows]
     steps:
-      - uses: actions/checkout@v4    
-      - name: Cache mint
-        id: cache-mint
-        uses: actions/cache@v4  
-        env:
-          cache-name: cache
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v4
         with:
-          path: |
-            .mint
-            Mint         
-          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
-          restore-keys: |
-            ${{ runner.os }}-mint-  
-      - name: Install mint
-        if: steps.cache-mint.outputs.cache-hit != 'true'
-        run: |
-          git clone https://github.com/yonaskolb/Mint.git
-          cd Mint
-          swift run mint install yonaskolb/mint
+          install: true
+          cache: true
       - name: Lint
-        run: ./Scripts/lint.sh
+        run: CI=true LINT_MODE=STRICT ./Scripts/lint.sh

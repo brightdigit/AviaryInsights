@@ -61,7 +61,7 @@ internal final actor MockTransport: ClientTransport {
     }
   }
 
-  internal private(set) var sentRequests = [Request]()
+  internal private(set) var sentRequests: [Request] = []
   private let nextResponse: @Sendable () -> Response
 
   internal init(nextResponse: @escaping @Sendable () -> Response) {
@@ -75,7 +75,9 @@ internal final actor MockTransport: ClientTransport {
     baseURL: URL,
     operationID: String
   ) async throws -> (HTTPResponse, HTTPBody?) {
-    sentRequests.append(.init(request: request, body: body, baseURL: baseURL, operationID: operationID))
+    sentRequests.append(
+      .init(request: request, body: body, baseURL: baseURL, operationID: operationID)
+    )
     return nextResponse().tuple()
   }
 }

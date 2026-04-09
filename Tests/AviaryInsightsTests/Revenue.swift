@@ -32,6 +32,6 @@ import Foundation
 
 extension Revenue {
   internal static func random() -> Revenue {
-    .init(currency: UUID().uuidString, amount: .random(in: 20 ... 999))
+    .init(currency: UUID().uuidString, amount: .random(in: 20...999))
   }
 }

@@ -32,14 +32,14 @@ import Foundation
 
 extension Event {
   private static func randomProps() -> [String: (any Sendable)?] {
-    var values = [String: (any Sendable)?]()
-    let keyCount: Int = .random(in: 3 ... 7)
-    for _ in 0 ..< keyCount {
+    var values: [String: (any Sendable)?] = [:]
+    let keyCount: Int = .random(in: 3...7)
+    for _ in 0..<keyCount {
       let value: any Sendable
       let type: Bool = .random()
       switch type {
       case false:
-        value = Int.random(in: 100 ... 999)
+        value = Int.random(in: 100...999)
       case true:
         value = UUID().uuidString
       }
@@ -55,7 +55,8 @@ extension Event {
       domain: Bool.random() ? UUID().uuidString : nil,
       referrer: Bool.random() ? UUID().uuidString : nil,
       props: Bool.random() ? randomProps() : nil,
-      revenue: Bool.random() ? .random() : nil
+      revenue: Bool.random() ? .random() : nil,
+      interactive: Bool.random() ? Bool.random() : nil
     )
   }
 }
