@@ -113,7 +113,6 @@ closure_body_length:
 identifier_name:
   excluded:
     - id
-    - db
     - no
 excluded:
   - DerivedData
