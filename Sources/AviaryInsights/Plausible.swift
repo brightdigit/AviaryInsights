@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,13 +29,14 @@
 
 import Foundation
 import OpenAPIRuntime
-import OpenAPIURLSession
+
+#if canImport(OpenAPIURLSession)
+  import OpenAPIURLSession
+#endif
 
 #if canImport(FoundationNetworking)
   import FoundationNetworking
 #endif
-
-// swiftlint:disable line_length
 
 /// Represents an interface to interact with the Plausible API.
 ///
@@ -47,10 +48,12 @@ import OpenAPIURLSession
 /// The domain is a string that identifies your application, typically the bundle identifier of your app.
 ///
 /// ```swift
-/// let plausible = Plausible(domain: "com.example.yourApp")
+/// let plausible = Plausible(defaultDomain: "com.example.yourApp", userAgent: "MyApp/1.0")
 /// ```
-/// By default ``Plausible`` uses a [`URLSessionTransport`](https://github.com/apple/swift-openapi-urlsession),
-/// however you can use alternatives such as [`AsyncHTTPClient`](https://github.com/swift-server/swift-openapi-async-http-client).
+/// By default ``Plausible`` uses a
+/// [`URLSessionTransport`](https://github.com/apple/swift-openapi-urlsession),
+/// however you can use alternatives such as
+/// [`AsyncHTTPClient`](https://github.com/swift-server/swift-openapi-async-http-client).
 ///
 /// ## Sending Event
 /// AviaryInsights provides two ways to send an ``Event`` to the Plausible API:
@@ -78,80 +81,117 @@ import OpenAPIURLSession
 /// ```
 /// In both cases, `event` is an instance of ``Event`` that you want to send to the Plausible API.
 public struct Plausible: Sendable {
-  // swiftlint:enable line_length
+  // swift-format-ignore: NeverUseForceTry
   // swiftlint:disable force_try
   /// Default server URL for the Plausible API.
-  public static let defaultServerURL = try! Servers.server1()
+  public static let defaultServerURL = try! Servers.Server1.url()
   // swiftlint:enable force_try
 
   private let client: Client
+
   /// Default domain associated with the Plausible instance.
   public let defaultDomain: String
 
-  private init(client: Client, defaultDomain: String) {
+  /// User-Agent string sent with every event request.
+  ///
+  /// Plausible uses this value to calculate unique visitor IDs and
+  /// populate device reports. It should identify your application,
+  /// for example `"MyApp/1.0 (com.example.myapp)"`.
+  public let userAgent: String
+
+  private init(client: Client, defaultDomain: String, userAgent: String) {
     self.client = client
     self.defaultDomain = defaultDomain
+    self.userAgent = userAgent
   }
 
   /// Initializes a Plausible instance with a custom `ClientTransport`.
   /// - Parameters:
   ///   - transport: Client transport for sending requests.
   ///   - defaultDomain: Default domain associated with the Plausible instance.
+  ///   - userAgent: User-Agent string for visitor identification.
   ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
   public init(
     transport: any ClientTransport,
     defaultDomain: String,
+    userAgent: String,
     serverURL: URL = Self.defaultServerURL
   ) {
     let client = Client(serverURL: serverURL, transport: transport)
-    self.init(client: client, defaultDomain: defaultDomain)
+    self.init(client: client, defaultDomain: defaultDomain, userAgent: userAgent)
   }
 
-  /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
-  /// - Parameters:
-  ///   - defaultDomain: Default domain associated with the Plausible instance.
-  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-  ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
-  public init(
-    defaultDomain: String,
-    serverURL: URL = Self.defaultServerURL,
-    configuration: URLSessionTransport.Configuration? = nil
-  ) {
-    let transport: URLSessionTransport = if let configuration {
-      .init(configuration: configuration)
-    } else {
-      .init()
+  #if canImport(OpenAPIURLSession)
+    /// Initializes a Plausible instance using the default `URLSessionTransport`.
+    /// - Parameters:
+    ///   - defaultDomain: Default domain associated with the Plausible instance.
+    ///   - userAgent: User-Agent string for visitor identification.
+    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    public init(
+      defaultDomain: String,
+      userAgent: String,
+      serverURL: URL = Self.defaultServerURL
+    ) {
+      self.init(
+        transport: URLSessionTransport(),
+        defaultDomain: defaultDomain,
+        userAgent: userAgent,
+        serverURL: serverURL
+      )
     }
-    self.init(
-      transport: transport,
-      defaultDomain: defaultDomain,
-      serverURL: serverURL
-    )
-  }
 
-  /// Initializes a Plausible instance with a custom URLSession.
-  /// - Parameters:
-  ///   - session: URLSession to use for making requests.
-  ///   - defaultDomain: Default domain associated with the Plausible instance.
-  ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-  public init(
-    session: URLSession,
-    defaultDomain: String,
-    serverURL: URL = Self.defaultServerURL
-  ) {
-    self.init(
-      defaultDomain: defaultDomain,
-      serverURL: serverURL,
-      configuration: .init(session: session)
-    )
-  }
+    /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
+    /// - Parameters:
+    ///   - defaultDomain: Default domain associated with the Plausible instance.
+    ///   - userAgent: User-Agent string for visitor identification.
+    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
+    public init(
+      defaultDomain: String,
+      userAgent: String,
+      serverURL: URL = Self.defaultServerURL,
+      configuration: URLSessionTransport.Configuration
+    ) {
+      let transport: URLSessionTransport = .init(configuration: configuration)
+      self.init(
+        transport: transport,
+        defaultDomain: defaultDomain,
+        userAgent: userAgent,
+        serverURL: serverURL
+      )
+    }
+    /// Initializes a Plausible instance with a custom URLSession.
+    /// - Parameters:
+    ///   - session: URLSession to use for making requests.
+    ///   - defaultDomain: Default domain associated with the Plausible instance.
+    ///   - userAgent: User-Agent string for visitor identification.
+    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    public init(
+      session: URLSession,
+      defaultDomain: String,
+      userAgent: String,
+      serverURL: URL = Self.defaultServerURL
+    ) {
+      self.init(
+        defaultDomain: defaultDomain,
+        userAgent: userAgent,
+        serverURL: serverURL,
+        configuration: .init(session: session)
+      )
+    }
+  #endif
 
   /// Sends an event to the Plausible API.
   /// - Parameter event: Event to be sent.
   public func postEvent(_ event: Event) async throws {
-    _ = try await client.post_sol_event(
+    let output = try await client.post_sol_event(
+      headers: .init(User_hyphen_Agent: userAgent),
       body: .init(event: event, defaultDomain: defaultDomain)
-    ).accepted
+    )
+    switch output {
+    case .accepted, .ok: break
+    default: break
+    }
   }
 }
 

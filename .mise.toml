@@ -1,0 +1,8 @@
+[settings]
+experimental = true
+
+[tools]
+swiftlint = "0.63.2"
+"spm:apple/swift-format" = "602.0.0"
+"spm:apple/swift-openapi-generator" = "1.11.1"
+periphery = {version = "3.7.2", os = ["macos"]}

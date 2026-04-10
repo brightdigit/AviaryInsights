@@ -50,7 +50,8 @@ extension Operations.post_sol_event.Input.Body.jsonPayload {
       url: event.url,
       referrer: event.referrer,
       props: propsContainer,
-      revenue: .init(revenue: event.revenue)
+      revenue: .init(revenue: event.revenue),
+      interactive: event.interactive
     )
   }
 }

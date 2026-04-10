@@ -54,6 +54,12 @@ public struct Event: Sendable {
   /// Revenue data for this event.
   public let revenue: Revenue?
 
+  /// Whether the event affects bounce rate.
+  ///
+  /// Defaults to `true`. Set to `false` for non-interactive events
+  /// that should not affect the bounce rate calculation.
+  public let interactive: Bool?
+
   /// Initializes an event.
   /// - Parameters:
   ///   - url: URL of the page where the event was triggered.
@@ -62,13 +68,15 @@ public struct Event: Sendable {
   ///   - referrer: Referrer for this event. Defaults to `nil`.
   ///   - props: Custom properties for the event. Defaults to `nil`.
   ///   - revenue: Revenue data for this event. Defaults to `nil`.
+  ///   - interactive: Whether the event affects bounce rate. Defaults to `nil`.
   public init(
     url: String,
     name: String = Self.pageview,
     domain: String? = nil,
     referrer: String? = nil,
     props: [String: (any Sendable)?]? = nil,
-    revenue: Revenue? = nil
+    revenue: Revenue? = nil,
+    interactive: Bool? = nil
   ) {
     self.name = name
     self.domain = domain
@@ -76,5 +84,6 @@ public struct Event: Sendable {
     self.referrer = referrer
     self.props = props
     self.revenue = revenue
+    self.interactive = interactive
   }
 }

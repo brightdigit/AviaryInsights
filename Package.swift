@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.1
 
 import PackageDescription
 
@@ -11,7 +11,7 @@ let package = Package(
     .macCatalyst(.v13),
     .tvOS(.v13),
     .visionOS(.v1),
-    .watchOS(.v6)
+    .watchOS(.v6),
   ],
   products: [
     .library(
@@ -20,15 +20,19 @@ let package = Package(
     )
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.0.0"),
-    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0")
+    .package(url: "https://github.com/apple/swift-openapi-runtime", from: "1.8.2"),
+    .package(url: "https://github.com/apple/swift-openapi-urlsession", from: "1.0.0"),
   ],
   targets: [
     .target(
       name: "AviaryInsights",
       dependencies: [
-        .product(name: "OpenAPIURLSession", package: "swift-openapi-urlsession"),
-        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+        .product(
+          name: "OpenAPIURLSession",
+          package: "swift-openapi-urlsession",
+          condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS, .macCatalyst])
+        ),
+        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
       ],
       swiftSettings: [
         SwiftSetting.enableUpcomingFeature("BareSlashRegexLiterals"),
@@ -37,15 +41,15 @@ let package = Package(
         SwiftSetting.enableUpcomingFeature("ForwardTrailingClosures"),
         SwiftSetting.enableUpcomingFeature("ImplicitOpenExistentials"),
         SwiftSetting.enableUpcomingFeature("DisableOutwardActorInference"),
-        SwiftSetting.enableExperimentalFeature("StrictConcurrency")
+        SwiftSetting.enableExperimentalFeature("StrictConcurrency"),
       ]
     ),
     .testTarget(
       name: "AviaryInsightsTests",
       dependencies: [
         "AviaryInsights",
-        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime")
+        .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
       ]
-    )
+    ),
   ]
 )

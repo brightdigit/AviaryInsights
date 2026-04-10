@@ -11,7 +11,6 @@ opt_in_rules:
   - contains_over_range_nil_comparison
   - convenience_type
   - discouraged_object_literal
-  - discouraged_optional_boolean
   - empty_collection_literal
   - empty_count
   - empty_string
@@ -43,6 +42,7 @@ opt_in_rules:
   - lower_acl_than_parent
   - missing_docs
   - modifier_order
+  - one_declaration_per_file
   - multiline_arguments
   - multiline_arguments_brackets
   - multiline_function_chains
@@ -119,7 +119,6 @@ excluded:
   - .build
   - .swiftpm
   - Sources/AviaryInsights/Generated
-  - Mint
 indentation_width:
   indentation_width: 2
 file_name:
@@ -131,3 +130,9 @@ disabled_rules:
     - nesting
     - implicit_getter
     - switch_case_alignment
+    - trailing_comma
+    - strict_fileprivate
+    - closure_parameter_position
+    - opening_brace
+    - optional_data_string_conversion
+    - todo

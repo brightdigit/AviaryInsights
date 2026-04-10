@@ -10,6 +10,30 @@ paths:
   /event:
     post:
       summary: Record a pageview or custom event
+      parameters:
+        - in: header
+          name: User-Agent
+          required: true
+          schema:
+            type: string
+          description: >
+            Used to calculate unique visitor ID and populate device reports
+            via the device-detector database.
+        - in: header
+          name: X-Forwarded-For
+          required: false
+          schema:
+            type: string
+          description: >
+            Overrides the client IP address. If comma-separated, the first
+            valid IP address is used. Supports IPv4 and IPv6.
+        - in: header
+          name: X-Debug-Request
+          required: false
+          schema:
+            type: boolean
+          description: >
+            When true, returns 200 with the IP address used for visitor counting.
       requestBody:
         required: true
         content:
@@ -32,6 +56,7 @@ paths:
                 url:
                   type: string
                   format: uri
+                  maxLength: 2000
                   description: URL of the page where the event was triggered.
                   example: http://dummy.site
                 referrer:
@@ -40,6 +65,7 @@ paths:
                   example: http://referrer.site
                 props:
                   type: object
+                  maxProperties: 30
                   description: Custom properties for the event.
                   example: {"author": "John Doe", "logged_in": "false"}
                 revenue:
@@ -57,6 +83,15 @@ paths:
                       type: number
                       description: Revenue amount.
                       example: 1322.22
+                interactive:
+                  type: boolean
+                  description: >
+                    Whether the event affects bounce rate. Defaults to true.
+                    Set to false for non-interactive events.
       responses:
         '202':
           description: Accepted
+        '200':
+          description: >
+            Debug response returned when X-Debug-Request header is true.
+            Contains the IP address used for visitor counting.
