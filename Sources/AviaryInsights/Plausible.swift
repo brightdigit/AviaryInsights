@@ -111,13 +111,24 @@ public struct Plausible: Sendable {
   ///   - defaultDomain: Default domain associated with the Plausible instance.
   ///   - userAgent: User-Agent string for visitor identification.
   ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+  ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``
+  ///     (status code and the `x-plausible-dropped` bot-filter marker). Defaults
+  ///     to `nil` (no reporting).
   public init(
     transport: any ClientTransport,
     defaultDomain: String,
     userAgent: String,
-    serverURL: URL = Self.defaultServerURL
+    serverURL: URL = Self.defaultServerURL,
+    diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
   ) {
-    let client = Client(serverURL: serverURL, transport: transport)
+    let middlewares = diagnostics.map {
+      [DiagnosticsMiddleware(handler: $0)] as [any ClientMiddleware]
+    }
+    let client = Client(
+      serverURL: serverURL,
+      transport: transport,
+      middlewares: middlewares ?? []
+    )
     self.init(client: client, defaultDomain: defaultDomain, userAgent: userAgent)
   }
 
@@ -127,16 +138,20 @@ public struct Plausible: Sendable {
     ///   - defaultDomain: Default domain associated with the Plausible instance.
     ///   - userAgent: User-Agent string for visitor identification.
     ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
+    ///     Defaults to `nil` (no reporting).
     public init(
       defaultDomain: String,
       userAgent: String,
-      serverURL: URL = Self.defaultServerURL
+      serverURL: URL = Self.defaultServerURL,
+      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
     ) {
       self.init(
         transport: URLSessionTransport(),
         defaultDomain: defaultDomain,
         userAgent: userAgent,
-        serverURL: serverURL
+        serverURL: serverURL,
+        diagnostics: diagnostics
       )
     }
 
@@ -146,18 +161,22 @@ public struct Plausible: Sendable {
     ///   - userAgent: User-Agent string for visitor identification.
     ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
     ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
+    ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
+    ///     Defaults to `nil` (no reporting).
     public init(
       defaultDomain: String,
       userAgent: String,
       serverURL: URL = Self.defaultServerURL,
-      configuration: URLSessionTransport.Configuration
+      configuration: URLSessionTransport.Configuration,
+      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
     ) {
       let transport: URLSessionTransport = .init(configuration: configuration)
       self.init(
         transport: transport,
         defaultDomain: defaultDomain,
         userAgent: userAgent,
-        serverURL: serverURL
+        serverURL: serverURL,
+        diagnostics: diagnostics
       )
     }
     /// Initializes a Plausible instance with a custom URLSession.
@@ -166,17 +185,21 @@ public struct Plausible: Sendable {
     ///   - defaultDomain: Default domain associated with the Plausible instance.
     ///   - userAgent: User-Agent string for visitor identification.
     ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
+    ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
+    ///     Defaults to `nil` (no reporting).
     public init(
       session: URLSession,
       defaultDomain: String,
       userAgent: String,
-      serverURL: URL = Self.defaultServerURL
+      serverURL: URL = Self.defaultServerURL,
+      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
     ) {
       self.init(
         defaultDomain: defaultDomain,
         userAgent: userAgent,
         serverURL: serverURL,
-        configuration: .init(session: session)
+        configuration: .init(session: session),
+        diagnostics: diagnostics
       )
     }
   #endif
