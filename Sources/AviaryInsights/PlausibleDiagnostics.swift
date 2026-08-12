@@ -35,19 +35,17 @@ import OpenAPIRuntime
 /// code alone.
 ///
 /// Plausible's events API returns **202 even for events it discards**, so a
-/// successful `postEvent` does not prove the event was recorded. The one
-/// discard signal it does expose is the `x-plausible-dropped: 1` response
-/// header, set when the event was rejected by bot filtering. See
+/// successful `postEvent` does not prove the event was recorded. The discard
+/// signal it exposes is the `x-plausible-dropped: 1` response header — the
+/// docs describe it for bot filtering, but it is also set for an unknown
+/// `domain` (empirically verified 2026-08-12). See
 /// https://plausible.io/docs/events-api.
 public struct PlausibleDiagnostics: Sendable {
   /// The HTTP status code of the response (202 on the accepted path).
   public let statusCode: Int
 
-  /// Whether Plausible reported the event dropped by bot filtering
-  /// (`x-plausible-dropped: 1`).
-  ///
-  /// `false` does **not** guarantee the event was recorded: discards for an
-  /// unknown `domain` are silent and carry no marker at all.
+  /// Whether Plausible reported the event dropped
+  /// (`x-plausible-dropped: 1` — bot filtering or an unknown `domain`).
   public let dropped: Bool
 }
 
