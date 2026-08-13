@@ -67,8 +67,10 @@ extension AviaryInsightsTests {
       let recorder = Recorder<any Error>()
       let failure = ThrowingTransport.Failure()
       let client = Self.makeFailingClient(failure: failure, onError: recorder.handler())
-      let postInBackground: (Event) -> Void = client.postEvent
-      postInBackground(.random())
+      // An unapplied method reference gets no default arguments, so the
+      // fire-and-forget overload has to be named with its full signature.
+      let postInBackground: (Event, [IPAddress]?, Bool?) -> Void = client.postEvent
+      postInBackground(.random(), nil, nil)
       let error = try #require(await recorder.waitForValue())
       let underlying = try #require(Self.underlyingError(of: error))
       #expect(underlying as? ThrowingTransport.Failure == failure)
@@ -82,8 +84,10 @@ extension AviaryInsightsTests {
         userAgent: UUID().uuidString,
         onError: { _ in }
       )
-      let postInBackground: (Event) -> Void = client.postEvent
-      postInBackground(.random())
+      // An unapplied method reference gets no default arguments, so the
+      // fire-and-forget overload has to be named with its full signature.
+      let postInBackground: (Event, [IPAddress]?, Bool?) -> Void = client.postEvent
+      postInBackground(.random(), nil, nil)
       _ = try await recorder.waitForValue(attempts: 20)
       #expect(recorder.received.isEmpty)
     }
@@ -94,8 +98,10 @@ extension AviaryInsightsTests {
         defaultDomain: UUID().uuidString,
         onError: recorder.handler()
       )
-      let postInBackground: (Event) -> Void = client.postEvent
-      postInBackground(.random())
+      // An unapplied method reference gets no default arguments, so the
+      // fire-and-forget overload has to be named with its full signature.
+      let postInBackground: (Event, [IPAddress]?, Bool?) -> Void = client.postEvent
+      postInBackground(.random(), nil, nil)
       _ = try await recorder.waitForValue(attempts: 20)
       #expect(recorder.received.isEmpty)
       #expect(await transport.sentRequests.count == 1)
