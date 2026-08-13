@@ -117,6 +117,20 @@ This method sends an event to the Plausible API in the background and ignores an
 plausible.postEvent(event)
 ```
 
+Delivery failures are reported to the `onError` handler you pass at initialization. It defaults to `Plausible.defaultErrorHandler`, which prints the error's description — the behavior this method has always had. Supply your own to route failures into a logger or metric, or `{ _ in }` to silence them entirely:
+
+```swift
+let plausible = Plausible(
+  defaultDomain: "com.example.yourApp",
+  userAgent: "MyApp/1.0 (com.example.yourApp)",
+  onError: { error in
+    logger.error("Plausible delivery failed: \(error)")
+  }
+)
+```
+
+Errors arrive wrapped in an `OpenAPIRuntime.ClientError`; its `underlyingError` is the transport failure. When a caller needs to react to the outcome inline, use the throwing `async` method instead.
+
 In both cases, `event` is an instance of ``Event`` that you want to send to the Plausible API.
 
 #### Diagnostics
