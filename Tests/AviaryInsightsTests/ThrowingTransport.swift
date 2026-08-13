@@ -1,5 +1,5 @@
 //
-//  Plausible+PostEvent.swift
+//  ThrowingTransport.swift
 //  AviaryInsights
 //
 //  Created by Leo Dion.
@@ -27,21 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-extension Plausible {
-  /// Sends the event to Plausible in the background.
-  ///
-  /// Delivery failures go to the `onError` handler given at initialization —
-  /// ``Plausible/defaultErrorHandler`` if none was, which prints. Use the
-  /// throwing `async` ``postEvent(_:)`` instead when the caller needs to react
-  /// to the failure inline.
-  /// - Parameter event: An analytic event to record.
-  public func postEvent(_ event: Event) {
-    Task {
-      do {
-        try await postEvent(event)
-      } catch {
-        onError(error)
-      }
+import Foundation
+import HTTPTypes
+import OpenAPIRuntime
+
+/// A transport that always fails, for exercising delivery-error paths.
+internal struct ThrowingTransport: ClientTransport {
+  /// The error `send` throws.
+  internal struct Failure: Error, Equatable {
+    internal let id: UUID
+
+    internal init(id: UUID = UUID()) {
+      self.id = id
     }
+  }
+
+  private let failure: Failure
+
+  internal init(failure: Failure = .init()) {
+    self.failure = failure
+  }
+
+  internal func send(
+    _ request: HTTPRequest,
+    body: HTTPBody?,
+    baseURL: URL,
+    operationID: String
+  ) async throws -> (HTTPResponse, HTTPBody?) {
+    throw failure
   }
 }
