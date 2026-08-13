@@ -12,6 +12,8 @@ Easy to use Swift Package for recording pageviews and custom events for [Plausib
 - **Revenue tracking** Track revenue data associated with events.
 - **Plausible API integration** Send your events to the [Plausible API](https://plausible.io/docs/events-api) for further analysis.
 - **Discard diagnostics** Observe HTTP status and `x-plausible-dropped` via ``PlausibleDiagnostics``.
+- **Error handling** Route fire-and-forget delivery failures through an `onError` handler (defaults to ``Plausible/defaultErrorHandler``).
+- **Attribution overrides** Supply the visitor's ``IPAddress`` via `forwardedFor` and ask Plausible to echo the counted address with `debugRequest`.
 
 ### Requirements 
 

@@ -24,6 +24,7 @@ Table of Contents
   * [Sending an Event](#sending-an-event)
     * [Asynchronous Throwing Method](#asynchronous-throwing-method)
     * [Synchronous Method](#synchronous-method)
+    * [Optional Request Headers](#optional-request-headers)
   * [Diagnostics](#diagnostics)
 * [License](#license)
    
@@ -35,6 +36,7 @@ Plausible provides simple and meaningful insights into your website's traffic wi
 - **Revenue tracking** Track revenue data associated with events.
 - **Plausible API integration** Send your events to the Plausible API for further analysis.
 - **Discard diagnostics** Observe HTTP status and `x-plausible-dropped` so you can tell when Plausible accepted vs discarded an event.
+- **Error handling** Route fire-and-forget delivery failures through an `onError` handler (defaults to printing).
 - **Attribution overrides** Supply the visitor's `IPAddress` and ask Plausible to echo back the address it counted.
 
 ## Requirements 

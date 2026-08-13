@@ -68,13 +68,14 @@ import OpenAPIRuntime
 ///
 /// ### Synchronous Method
 ///
-/// This method sends an event to the Plausible API in the background and ignores any errors that occur.
-/// This is useful when you don't need to handle errors and
-/// want to fire-and-forget the event. Here's an example:
+/// This method sends an event to the Plausible API in the background.
+/// Delivery failures go to the `onError` handler given at initialization
+/// (``defaultErrorHandler`` if none was, which prints). Here's an example:
 ///
 /// ```swift
 /// plausible.postEvent(event)
 /// ```
+/// Both methods also accept optional `forwardedFor` and `debugRequest` headers.
 /// In both cases, `event` is an instance of ``Event`` that you want to send to the Plausible API.
 public struct Plausible: Sendable {
   // swift-format-ignore: NeverUseForceTry
