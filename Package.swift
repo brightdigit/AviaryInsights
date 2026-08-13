@@ -30,7 +30,12 @@ let package = Package(
         .product(
           name: "OpenAPIURLSession",
           package: "swift-openapi-urlsession",
-          condition: .when(platforms: [.macOS, .iOS, .tvOS, .watchOS, .visionOS, .macCatalyst])
+          // Apple + Linux/Windows/Android (OpenAPIURLSession-supported). WASI
+          // stays excluded — URLSession is unavailable there (AviaryInsights#34).
+          condition: .when(platforms: [
+            .macOS, .iOS, .tvOS, .watchOS, .visionOS, .macCatalyst,
+            .linux, .windows, .android,
+          ])
         ),
         .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
       ],
