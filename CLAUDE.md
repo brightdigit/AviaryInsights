@@ -53,3 +53,9 @@ Run `mise install` to install all tools before running scripts.
 - Strict SwiftLint rules are enforced (explicit ACL, no force unwrapping, etc.) — see `.swiftlint.yml`
 - Swift Format rules are in `.swift-format`
 - CI runs linting in strict mode (`CI=true LINT_MODE=STRICT`)
+
+## Memory & Corrections Convention
+
+`.claude/agent-notes.md` is the source of truth for how to work in this repo: user corrections and standing always/never directives.
+
+At the start of every session, read `.claude/agent-notes.md` before doing any work. Follow that file’s header for when and how to append or revise entries (one line per directive, newest at bottom, supersede stale lines in place).
