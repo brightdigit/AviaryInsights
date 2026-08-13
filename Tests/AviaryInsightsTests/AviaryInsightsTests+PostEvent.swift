@@ -62,8 +62,10 @@ extension AviaryInsightsTests {
       let event = Event.random()
       // In an `async throws` context the two `postEvent` overloads both apply
       // and the async one wins, so name the fire-and-forget one explicitly.
-      let postInBackground: (Event) -> Void = client.postEvent
-      postInBackground(event)
+      // An unapplied method reference gets no default arguments, hence the
+      // full signature.
+      let postInBackground: (Event, [IPAddress]?, Bool?) -> Void = client.postEvent
+      postInBackground(event, nil, nil)
       let requests = try await transport.waitForRequests(count: 1)
       try Plausible.assert(events: [event], requests: requests, defaultDomain: defaultDomain)
     }

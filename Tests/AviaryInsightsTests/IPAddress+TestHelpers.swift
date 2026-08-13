@@ -1,5 +1,5 @@
 //
-//  Plausible+PostEvent.swift
+//  IPAddress+TestHelpers.swift
 //  AviaryInsights
 //
 //  Created by Leo Dion.
@@ -27,34 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-extension Plausible {
-  /// Sends the event to Plausible in the background.
+@testable import AviaryInsights
+
+// Sample addresses for tests only — deliberately not part of the public API.
+extension IPAddress {
+  /// RFC 5737 documentation address `203.0.113.7`.
+  internal static let example = IPAddress(203, 0, 113, 7)
+
+  /// RFC 3849 documentation address `2001:db8::1`.
   ///
-  /// Delivery failures go to the `onError` handler given at initialization —
-  /// ``Plausible/defaultErrorHandler`` if none was, which prints. Use the
-  /// throwing `async` `postEvent` instead when the caller needs to react to
-  /// the failure inline.
-  /// - Parameters:
-  ///   - event: An analytic event to record.
-  ///   - forwardedFor: Client IP addresses Plausible attributes the event to
-  ///     (`X-Forwarded-For`). Plausible uses the first valid address.
-  ///   - debugRequest: When `true`, asks Plausible to answer `200` with the IP
-  ///     address it used for visitor counting (`X-Debug-Request`).
-  public func postEvent(
-    _ event: Event,
-    forwardedFor: [IPAddress]? = nil,
-    debugRequest: Bool? = nil
-  ) {
-    Task {
-      do {
-        try await postEvent(
-          event,
-          forwardedFor: forwardedFor,
-          debugRequest: debugRequest
-        )
-      } catch {
-        onError(error)
-      }
-    }
-  }
+  /// Built from groups rather than text so no force unwrap is needed; the
+  /// fallback is never reached in practice and `IPAddressTests` asserts the
+  /// real value.
+  internal static let ipv6Example =
+    IPAddress(groups: [0x2001, 0x0DB8, 0, 0, 0, 0, 0, 1]) ?? .ipv6Unspecified
 }

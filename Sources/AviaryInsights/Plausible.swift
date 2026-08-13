@@ -86,7 +86,7 @@ public struct Plausible: Sendable {
   /// Handler used when a caller does not supply one.
   ///
   /// Prints the error's description, preserving the behavior the
-  /// fire-and-forget ``postEvent(_:)`` had before the handler existed. Pass
+  /// fire-and-forget `postEvent` had before the handler existed. Pass
   /// your own to route failures into a logger or metric, or `{ _ in }` to
   /// silence them.
   public static let defaultErrorHandler: @Sendable (any Error) -> Void = { error in
@@ -95,7 +95,7 @@ public struct Plausible: Sendable {
 
   private let client: Client
 
-  /// Called when the fire-and-forget ``postEvent(_:)`` fails to deliver.
+  /// Called when the fire-and-forget `postEvent` fails to deliver.
   internal let onError: @Sendable (any Error) -> Void
 
   /// Default domain associated with the Plausible instance.
@@ -130,7 +130,7 @@ public struct Plausible: Sendable {
   ///     (status code and the `x-plausible-dropped` bot-filter marker). Defaults
   ///     to `nil` (no reporting).
   ///   - onError: Handler receiving delivery failures from the fire-and-forget
-  ///     ``postEvent(_:)``. Defaults to ``defaultErrorHandler``, which prints.
+  ///     `postEvent`. Defaults to ``defaultErrorHandler``, which prints.
   public init(
     transport: any ClientTransport,
     defaultDomain: String,
@@ -156,10 +156,25 @@ public struct Plausible: Sendable {
   }
 
   /// Sends an event to the Plausible API.
-  /// - Parameter event: Event to be sent.
-  public func postEvent(_ event: Event) async throws {
+  /// - Parameters:
+  ///   - event: Event to be sent.
+  ///   - forwardedFor: Overrides the client IP addresses Plausible attributes
+  ///     the event to (`X-Forwarded-For`). Serialized as a comma-separated
+  ///     list; Plausible uses the first valid address. Supports IPv4 and IPv6.
+  ///   - debugRequest: When `true`, asks Plausible to answer `200` with the IP
+  ///     address it used for visitor counting (`X-Debug-Request`), instead of
+  ///     the usual `202`.
+  public func postEvent(
+    _ event: Event,
+    forwardedFor: [IPAddress]? = nil,
+    debugRequest: Bool? = nil
+  ) async throws {
     let output = try await client.post_sol_event(
-      headers: .init(User_hyphen_Agent: userAgent),
+      headers: .init(
+        User_hyphen_Agent: userAgent,
+        X_hyphen_Forwarded_hyphen_For: forwardedFor?.map(\.description).joined(separator: ","),
+        X_hyphen_Debug_hyphen_Request: debugRequest
+      ),
       body: .init(event: event, defaultDomain: defaultDomain)
     )
     switch output {
