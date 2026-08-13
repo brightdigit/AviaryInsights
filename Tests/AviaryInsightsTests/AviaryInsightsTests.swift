@@ -41,6 +41,14 @@ internal struct AviaryInsightsTests {
     #endif
   }()
 
+  /// Number of events `postEvent()` posts. Fixed rather than random so a
+  /// failure reproduces from the test name alone.
+  #if os(WASI)
+    private static let eventCount = 3
+  #else
+    private static let eventCount = 15
+  #endif
+
   private let decoder = JSONDecoder()
   private let encoder: JSONEncoder = {
     let encoder = JSONEncoder()
@@ -65,6 +73,9 @@ internal struct AviaryInsightsTests {
     requests: [MockTransport.Request],
     defaultDomain: String
   ) throws {
+    // `zip` stops at the shorter sequence, so without this the whole comparison
+    // is skipped — and the test passes — when no requests were recorded at all.
+    try #require(requests.count == events.count)
     for (event, request) in zip(events, requests) {
       let data = try #require(request.body)
       let actualJSONPayload = try decoder.decode(
@@ -84,11 +95,7 @@ internal struct AviaryInsightsTests {
   @Test internal func postEvent() async throws {
     let defaultDomain = UUID().uuidString
     let (transport, client) = makeClient(defaultDomain: defaultDomain)
-    #if os(WASI)
-      let events = (0..<Int.random(in: 1...3)).map { _ in Event.random() }
-    #else
-      let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
-    #endif
+    let events = (0..<Self.eventCount).map { _ in Event.random() }
     for event in events { try await client.postEvent(event) }
     let requests = await transport.sentRequests
     try assert(events: events, requests: requests, defaultDomain: defaultDomain)

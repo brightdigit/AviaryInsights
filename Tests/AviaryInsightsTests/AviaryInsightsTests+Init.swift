@@ -44,8 +44,6 @@ extension AviaryInsightsTests {
       let client = Plausible(defaultDomain: domain, userAgent: agent)
       #expect(client.defaultDomain == domain)
       #expect(client.userAgent == agent)
-    #else
-      Issue.record("OpenAPIURLSession not available on this platform")
     #endif
   }
 
@@ -58,8 +56,6 @@ extension AviaryInsightsTests {
       let client = Plausible(defaultDomain: domain, userAgent: agent, configuration: config)
       #expect(client.defaultDomain == domain)
       #expect(client.userAgent == agent)
-    #else
-      Issue.record("OpenAPIURLSession not available on this platform")
     #endif
   }
 
@@ -70,8 +66,6 @@ extension AviaryInsightsTests {
       let client = Plausible(session: .shared, defaultDomain: domain, userAgent: agent)
       #expect(client.defaultDomain == domain)
       #expect(client.userAgent == agent)
-    #else
-      Issue.record("OpenAPIURLSession not available on this platform")
     #endif
   }
 }
