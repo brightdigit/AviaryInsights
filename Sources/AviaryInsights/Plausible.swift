@@ -83,7 +83,20 @@ public struct Plausible: Sendable {
   public static let defaultServerURL = try! Servers.Server1.url()
   // swiftlint:enable force_try
 
+  /// Handler used when a caller does not supply one.
+  ///
+  /// Prints the error's description, preserving the behavior the
+  /// fire-and-forget ``postEvent(_:)`` had before the handler existed. Pass
+  /// your own to route failures into a logger or metric, or `{ _ in }` to
+  /// silence them.
+  public static let defaultErrorHandler: @Sendable (any Error) -> Void = { error in
+    print(error.localizedDescription)
+  }
+
   private let client: Client
+
+  /// Called when the fire-and-forget ``postEvent(_:)`` fails to deliver.
+  internal let onError: @Sendable (any Error) -> Void
 
   /// Default domain associated with the Plausible instance.
   public let defaultDomain: String
@@ -95,10 +108,16 @@ public struct Plausible: Sendable {
   /// for example `"MyApp/1.0 (com.example.myapp)"`.
   public let userAgent: String
 
-  private init(client: Client, defaultDomain: String, userAgent: String) {
+  private init(
+    client: Client,
+    defaultDomain: String,
+    userAgent: String,
+    onError: @escaping @Sendable (any Error) -> Void
+  ) {
     self.client = client
     self.defaultDomain = defaultDomain
     self.userAgent = userAgent
+    self.onError = onError
   }
 
   /// Initializes a Plausible instance with a custom `ClientTransport`.
@@ -110,12 +129,15 @@ public struct Plausible: Sendable {
   ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``
   ///     (status code and the `x-plausible-dropped` bot-filter marker). Defaults
   ///     to `nil` (no reporting).
+  ///   - onError: Handler receiving delivery failures from the fire-and-forget
+  ///     ``postEvent(_:)``. Defaults to ``defaultErrorHandler``, which prints.
   public init(
     transport: any ClientTransport,
     defaultDomain: String,
     userAgent: String,
     serverURL: URL = Self.defaultServerURL,
-    diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
+    diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil,
+    onError: @escaping @Sendable (any Error) -> Void = Self.defaultErrorHandler
   ) {
     let middlewares = diagnostics.map {
       [DiagnosticsMiddleware(handler: $0)] as [any ClientMiddleware]
@@ -125,7 +147,12 @@ public struct Plausible: Sendable {
       transport: transport,
       middlewares: middlewares ?? []
     )
-    self.init(client: client, defaultDomain: defaultDomain, userAgent: userAgent)
+    self.init(
+      client: client,
+      defaultDomain: defaultDomain,
+      userAgent: userAgent,
+      onError: onError
+    )
   }
 
   /// Sends an event to the Plausible API.
