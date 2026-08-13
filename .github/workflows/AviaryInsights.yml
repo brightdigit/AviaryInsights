@@ -83,6 +83,11 @@ jobs:
           # nightly-6.4 is noble-only
           - os: jammy
             swift: {version: "6.4"}
+          # 6.4 wasm SDK pin lags the moving nightly container; re-enable when matched
+          - swift: {version: "6.4"}
+            type: wasm
+          - swift: {version: "6.4"}
+            type: wasm-embedded
           - swift: {version: "6.1"}
             type: wasm
           - swift: {version: "6.1"}
@@ -161,44 +166,44 @@ jobs:
             osVersion: "18.5"
             download-platform: true
 
-          # macOS 26 / Xcode 26.4 SPM Build
+          # macOS 26 / Xcode 26.6 SPM Build
           - os: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
 
           - type: macos
             os: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
 
           # macOS 26 iOS Build
           - type: ios
             os: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "iPhone 17"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # macOS 26 watchOS Build
           - type: watchos
             os: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple Watch Ultra 3 (49mm)"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # macOS 26 visionOS Build
           - type: visionos
             os: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple Vision Pro"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
           # macOS 26 tvOS Build
           - type: tvos
             os: macos-26
-            xcode: "/Applications/Xcode_26.4.app"
+            xcode: "/Applications/Xcode_26.6.app"
             deviceName: "Apple TV 4K (3rd generation)"
-            osVersion: "26.4"
+            osVersion: "26.5"
             download-platform: true
 
     steps:
