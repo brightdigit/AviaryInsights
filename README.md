@@ -2,7 +2,7 @@
 
 Easy to use Swift Package for recording pageviews and custom events for Plausible. 
 
-[![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
+[![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20Windows%20%7C%20Android%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
 [![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
 ![GitHub](https://img.shields.io/github/license/brightdigit/AviaryInsights)
 ![GitHub issues](https://img.shields.io/github/issues/brightdigit/AviaryInsights)
@@ -26,10 +26,11 @@ Table of Contents
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Usage](#usage)
+  * [Plausible Client](#plausible-client)
   * [Sending an Event](#sending-an-event)
     * [Asynchronous Throwing Method](#asynchronous-throwing-method)
     * [Synchronous Method](#synchronous-method)
-* [Contributing](#contributing)
+  * [Diagnostics](#diagnostics)
 * [License](#license)
    
 ## Features
@@ -39,6 +40,7 @@ Plausible provides simple and meaningful insights into your website's traffic wi
 - **Event tracking** Define and track custom events in your application.
 - **Revenue tracking** Track revenue data associated with events.
 - **Plausible API integration** Send your events to the Plausible API for further analysis.
+- **Discard diagnostics** Observe HTTP status and `x-plausible-dropped` so you can tell when Plausible accepted vs discarded an event.
 
 ## Requirements 
 
@@ -48,10 +50,10 @@ Plausible provides simple and meaningful insights into your website's traffic wi
 - Swift 5.9 or later
 - iOS 13 / watchOS 6 / tvOS 13 / visionOS 1 / macCatalyst 13 / macOS 10.15 or later deployment targets
 
-**Linux**
+**Linux / Windows / Android**
 
-- Ubuntu 20.04 or later
 - Swift 5.9 or later
+- Default `URLSessionTransport` initializer is available (WASI requires a custom `ClientTransport`)
 
 ## Installation
 
@@ -68,33 +70,37 @@ https://github.com/brightdigit/AviaryInsights.git
 ```swift
 import AviaryInsights
 
-// Initialize the client with your bundle identifier as the domain
-let plausible = Plausible(domain: "com.example.yourApp")
+// Initialize the client with your Plausible site domain and app User-Agent
+let plausible = Plausible(
+  defaultDomain: "com.example.yourApp",
+  userAgent: "MyApp/1.0 (com.example.yourApp)"
+)
 
 // Define an event
 let event = Event(url: "app://localhost/login")
 
-// Send the event
-plausible.send(event: event)
+// Send the event (fire-and-forget)
+plausible.postEvent(event)
 ```
 
 ### `Plausible` Client
 
-`Plausible` is a client for interacting with the Plausible API. It is initialized with a domain, which is typically your app's bundle identifier. The `Plausible` client is used to send events to the Plausible API for tracking and analysis.
-
-To construct a `Plausible` instance, you need to provide a domain. The domain is a string that identifies your application, typically the bundle identifier of your app.
+`Plausible` is a client for interacting with the Plausible API. It is initialized with a domain (your Plausible site) and a User-Agent string Plausible uses for visitor identification.
 
 ```swift
-let plausible = Plausible(domain: "com.example.yourApp")
+let plausible = Plausible(
+  defaultDomain: "com.example.yourApp",
+  userAgent: "MyApp/1.0 (com.example.yourApp)"
+)
 ```
 
-By default `Plausible` uses a `URLSessionTransport`, however you can use alternatives such as AsyncClient.
+By default `Plausible` uses a [`URLSessionTransport`](https://github.com/apple/swift-openapi-urlsession) on Apple platforms, Linux, Windows, and Android. WASI builds need an explicit custom `ClientTransport`. You can also pass alternatives such as [`AsyncHTTPClient`](https://github.com/swift-server/swift-openapi-async-http-client) via `Plausible(transport:defaultDomain:userAgent:)`.
 
 ### Sending an `Event`
 
-`Event` represents an event in your system. An event has a name, and optionally, a domain, URL, referrer, custom properties (`props`), and revenue information. You can create an `Event` instance and send it using the `Plausible` client.
+`Event` represents an event in your system. An event has a name and URL, and optionally a domain, referrer, custom properties (`props`), revenue, and interactive flag.
 
-To construct an `Event`, you need to provide at least a name. The name is a string that identifies the event you want to track. Optionally, you can also provide:
+To construct an `Event`, provide at least a `url`. Optionally:
 
 - **`name`** string that represents the name of the event. _Default_ is **pageview**.
 - **`url`** string that represents the URL where the event occurred. For an app you may wish to use a app url such as `app://localhost/login`.
@@ -102,18 +108,17 @@ To construct an `Event`, you need to provide at least a name. The name is a stri
 - `referrer` _optional_ string that represents the URL of the referrer
 - `props` _optional_ dictionary of custom properties associated with the event.
 - `revenue` _optional_ `Revenue` instance that represents the revenue data associated with the event
+- `interactive` _optional_ whether the event affects bounce rate
 
 ```swift
-let event = Event
-    name: "eventName", 
-    domain: "domain",
-    url: "url", 
-    referrer: "referrer", 
-    props: ["key": "value"], 
-    revenue: Revenue(
-        currencyCode: "USD", 
-        amount: 100
-    )
+let event = Event(
+  url: "app://localhost/checkout",
+  name: "purchase",
+  domain: "com.example.yourApp",
+  referrer: "app://localhost/cart",
+  props: ["plan": "pro"],
+  revenue: Revenue(currency: "USD", amount: 100),
+  interactive: true
 )
 ```
 
@@ -140,6 +145,24 @@ plausible.postEvent(event)
 ```
 
 In both cases, `event` is an instance of `Event` that you want to send to the Plausible API.
+
+### Diagnostics
+
+Plausible's events API often returns **202 even when it discards the event**. The discard signal is the `x-plausible-dropped: 1` response header (bot filtering or an unknown `domain`). Pass a `diagnostics` handler to observe each response:
+
+```swift
+let plausible = Plausible(
+  defaultDomain: "com.example.yourApp",
+  userAgent: "MyApp/1.0 (com.example.yourApp)",
+  diagnostics: { diagnostics in
+    if diagnostics.dropped {
+      // Event was not recorded (bot filter or unknown domain)
+    }
+  }
+)
+```
+
+`PlausibleDiagnostics` exposes `statusCode` and `dropped`.
 
 ## License
 
