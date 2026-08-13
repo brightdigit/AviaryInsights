@@ -1,9 +1,9 @@
 //
-//  AviaryInsightsTests.swift
+//  Revenue+TestHelpers.swift
 //  AviaryInsights
 //
 //  Created by Leo Dion.
-//  Copyright © 2026 BrightDigit.
+//  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,11 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Testing
+import AviaryInsights
+import Foundation
 
-/// Root suite for the AviaryInsights package.
-///
-/// The parent carries the `Tests` suffix and stays empty; every concern lives
-/// in an `AviaryInsightsTests+<Concern>.swift` extension that nests its own
-/// `@Suite` type, so the children report underneath this one.
-@Suite("AviaryInsights") internal enum AviaryInsightsTests {}
+extension Revenue {
+  internal static func random() -> Revenue {
+    .init(currency: UUID().uuidString, amount: .random(in: 20...999))
+  }
+}
