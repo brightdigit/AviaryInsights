@@ -3,21 +3,15 @@
 Easy to use Swift Package for recording pageviews and custom events for Plausible. 
 
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20Windows%20%7C%20Android%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
-[![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
-![GitHub](https://img.shields.io/github/license/brightdigit/AviaryInsights)
-![GitHub issues](https://img.shields.io/github/issues/brightdigit/AviaryInsights)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/AviaryInsights/AviaryInsights.yml?label=actions&logo=github&?branch=main)
+[![License](https://img.shields.io/github/license/brightdigit/AviaryInsights)](https://github.com/brightdigit/AviaryInsights/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/brightdigit/AviaryInsights)](https://github.com/brightdigit/AviaryInsights/issues)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/AviaryInsights/AviaryInsights.yml?branch=main&label=actions&logo=github)](https://github.com/brightdigit/AviaryInsights/actions/workflows/AviaryInsights.yml)
 
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
+[![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
+[![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
 
 [![Codecov](https://img.shields.io/codecov/c/github/brightdigit/AviaryInsights)](https://codecov.io/gh/brightdigit/AviaryInsights)
 [![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/AviaryInsights)](https://www.codefactor.io/repository/github/brightdigit/AviaryInsights)
-[![codebeat badge](https://codebeat.co/badges/94a8313d-2215-4ef6-8690-ab7b3e06369c)](https://codebeat.co/projects/github-com-brightdigit-mistkit-main)
-[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/brightdigit/AviaryInsights)](https://codeclimate.com/github/brightdigit/AviaryInsights)
-[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/brightdigit/AviaryInsights?label=debt)](https://codeclimate.com/github/brightdigit/AviaryInsights)
-[![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/AviaryInsights)](https://codeclimate.com/github/brightdigit/AviaryInsights)
-[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
 Table of Contents
 =================
