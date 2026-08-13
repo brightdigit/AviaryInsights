@@ -30,10 +30,6 @@
 import Foundation
 import OpenAPIRuntime
 
-#if canImport(OpenAPIURLSession)
-  import OpenAPIURLSession
-#endif
-
 #if canImport(FoundationNetworking)
   import FoundationNetworking
 #endif
@@ -132,78 +128,6 @@ public struct Plausible: Sendable {
     self.init(client: client, defaultDomain: defaultDomain, userAgent: userAgent)
   }
 
-  #if canImport(OpenAPIURLSession)
-    /// Initializes a Plausible instance using the default `URLSessionTransport`.
-    /// - Parameters:
-    ///   - defaultDomain: Default domain associated with the Plausible instance.
-    ///   - userAgent: User-Agent string for visitor identification.
-    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-    ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
-    ///     Defaults to `nil` (no reporting).
-    public init(
-      defaultDomain: String,
-      userAgent: String,
-      serverURL: URL = Self.defaultServerURL,
-      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
-    ) {
-      self.init(
-        transport: URLSessionTransport(),
-        defaultDomain: defaultDomain,
-        userAgent: userAgent,
-        serverURL: serverURL,
-        diagnostics: diagnostics
-      )
-    }
-
-    /// Initializes a Plausible instance with a custom `URLSessionTransport.Configuration`.
-    /// - Parameters:
-    ///   - defaultDomain: Default domain associated with the Plausible instance.
-    ///   - userAgent: User-Agent string for visitor identification.
-    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-    ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
-    ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
-    ///     Defaults to `nil` (no reporting).
-    public init(
-      defaultDomain: String,
-      userAgent: String,
-      serverURL: URL = Self.defaultServerURL,
-      configuration: URLSessionTransport.Configuration,
-      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
-    ) {
-      let transport: URLSessionTransport = .init(configuration: configuration)
-      self.init(
-        transport: transport,
-        defaultDomain: defaultDomain,
-        userAgent: userAgent,
-        serverURL: serverURL,
-        diagnostics: diagnostics
-      )
-    }
-    /// Initializes a Plausible instance with a custom URLSession.
-    /// - Parameters:
-    ///   - session: URLSession to use for making requests.
-    ///   - defaultDomain: Default domain associated with the Plausible instance.
-    ///   - userAgent: User-Agent string for visitor identification.
-    ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
-    ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
-    ///     Defaults to `nil` (no reporting).
-    public init(
-      session: URLSession,
-      defaultDomain: String,
-      userAgent: String,
-      serverURL: URL = Self.defaultServerURL,
-      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
-    ) {
-      self.init(
-        defaultDomain: defaultDomain,
-        userAgent: userAgent,
-        serverURL: serverURL,
-        configuration: .init(session: session),
-        diagnostics: diagnostics
-      )
-    }
-  #endif
-
   /// Sends an event to the Plausible API.
   /// - Parameter event: Event to be sent.
   public func postEvent(_ event: Event) async throws {
@@ -214,20 +138,6 @@ public struct Plausible: Sendable {
     switch output {
     case .accepted, .ok: break
     default: break
-    }
-  }
-}
-
-extension Plausible {
-  /// Sends the event to Plausible in the background.
-  /// - Parameter event: An analytic event to record.
-  public func postEvent(_ event: Event) {
-    Task {
-      do {
-        try await postEvent(event)
-      } catch {
-        print(error.localizedDescription)
-      }
     }
   }
 }

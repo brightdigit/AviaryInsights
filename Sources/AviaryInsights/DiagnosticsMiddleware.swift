@@ -1,5 +1,5 @@
 //
-//  PlausibleDiagnostics.swift
+//  DiagnosticsMiddleware.swift
 //  AviaryInsights
 //
 //  Created by Leo Dion.
@@ -27,20 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-/// Per-request outcome details Plausible does not surface through its status
-/// code alone.
-///
-/// Plausible's events API returns **202 even for events it discards**, so a
-/// successful `postEvent` does not prove the event was recorded. The discard
-/// signal it exposes is the `x-plausible-dropped: 1` response header — the
-/// docs describe it for bot filtering, but it is also set for an unknown
-/// `domain` (empirically verified 2026-08-12). See
-/// https://plausible.io/docs/events-api.
-public struct PlausibleDiagnostics: Sendable {
-  /// The HTTP status code of the response (202 on the accepted path).
-  public let statusCode: Int
+import Foundation
+import HTTPTypes
+import OpenAPIRuntime
 
-  /// Whether Plausible reported the event dropped
-  /// (`x-plausible-dropped: 1` — bot filtering or an unknown `domain`).
-  public let dropped: Bool
+/// A client middleware that reports each response's ``PlausibleDiagnostics``
+/// to a caller-supplied handler, so integrators can log why an event vanished.
+internal struct DiagnosticsMiddleware: ClientMiddleware {
+  private static let droppedHeader = HTTPField.Name("x-plausible-dropped")
+
+  internal let handler: @Sendable (PlausibleDiagnostics) -> Void
+
+  internal init(handler: @escaping @Sendable (PlausibleDiagnostics) -> Void) {
+    self.handler = handler
+  }
+
+  internal func intercept(
+    _ request: HTTPRequest,
+    body: HTTPBody?,
+    baseURL: URL,
+    operationID _: String,
+    next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+  ) async throws -> (HTTPResponse, HTTPBody?) {
+    let (response, responseBody) = try await next(request, body, baseURL)
+    let dropped = Self.droppedHeader.map { response.headerFields[$0] == "1" } ?? false
+    handler(
+      PlausibleDiagnostics(statusCode: response.status.code, dropped: dropped)
+    )
+    return (response, responseBody)
+  }
 }
