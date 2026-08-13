@@ -30,6 +30,7 @@
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
+import Testing
 
 internal final actor MockTransport: ClientTransport {
   internal struct Request {
@@ -38,11 +39,23 @@ internal final actor MockTransport: ClientTransport {
     private let baseURL: URL
     private let operationID: String
 
+    /// Headers the client actually put on the wire.
+    internal var headerFields: HTTPFields { request.headerFields }
+
     internal init(request: HTTPRequest, body: Data? = nil, baseURL: URL, operationID: String) {
       self.request = request
       self.body = body
       self.baseURL = baseURL
       self.operationID = operationID
+    }
+
+    /// Reads a header off the recorded request, failing the test if absent.
+    ///
+    /// - Parameter name: Name of the header field to read.
+    /// - Returns: The value the client sent for that header.
+    internal func headerValue(_ name: String) throws -> String {
+      let fieldName = try #require(HTTPField.Name(name))
+      return try #require(headerFields[fieldName])
     }
   }
 
@@ -84,5 +97,18 @@ internal final actor MockTransport: ClientTransport {
       .init(request: request, body: bodyData, baseURL: baseURL, operationID: operationID)
     )
     return nextResponse().tuple()
+  }
+
+  /// Waits for at least `count` requests to arrive.
+  ///
+  /// Exists for the fire-and-forget `postEvent` overload, whose `Task`
+  /// completes after the caller returns. Gives up after roughly a second and
+  /// returns whatever was recorded, so a regression fails on the assertion
+  /// rather than hanging the suite.
+  internal func waitForRequests(count: Int) async throws -> [Request] {
+    for _ in 0..<100 where sentRequests.count < count {
+      try await Task.sleep(nanoseconds: 10_000_000)
+    }
+    return sentRequests
   }
 }

@@ -3,21 +3,15 @@
 Easy to use Swift Package for recording pageviews and custom events for Plausible. 
 
 [![SwiftPM](https://img.shields.io/badge/SPM-Linux%20%7C%20Windows%20%7C%20Android%20%7C%20iOS%20%7C%20macOS%20%7C%20watchOS%20%7C%20tvOS-success?logo=swift)](https://swift.org)
-[![Twitter](https://img.shields.io/badge/twitter-@brightdigit-blue.svg?style=flat)](http://twitter.com/brightdigit)
-![GitHub](https://img.shields.io/github/license/brightdigit/AviaryInsights)
-![GitHub issues](https://img.shields.io/github/issues/brightdigit/AviaryInsights)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/AviaryInsights/AviaryInsights.yml?label=actions&logo=github&?branch=main)
+[![License](https://img.shields.io/github/license/brightdigit/AviaryInsights)](https://github.com/brightdigit/AviaryInsights/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/brightdigit/AviaryInsights)](https://github.com/brightdigit/AviaryInsights/issues)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brightdigit/AviaryInsights/AviaryInsights.yml?branch=main&label=actions&logo=github)](https://github.com/brightdigit/AviaryInsights/actions/workflows/AviaryInsights.yml)
 
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
+[![Swift Versions](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
+[![Platforms](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrightdigit%2FAviaryInsights%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brightdigit/AviaryInsights)
 
 [![Codecov](https://img.shields.io/codecov/c/github/brightdigit/AviaryInsights)](https://codecov.io/gh/brightdigit/AviaryInsights)
 [![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/brightdigit/AviaryInsights)](https://www.codefactor.io/repository/github/brightdigit/AviaryInsights)
-[![codebeat badge](https://codebeat.co/badges/94a8313d-2215-4ef6-8690-ab7b3e06369c)](https://codebeat.co/projects/github-com-brightdigit-mistkit-main)
-[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/brightdigit/AviaryInsights)](https://codeclimate.com/github/brightdigit/AviaryInsights)
-[![Code Climate technical debt](https://img.shields.io/codeclimate/tech-debt/brightdigit/AviaryInsights?label=debt)](https://codeclimate.com/github/brightdigit/AviaryInsights)
-[![Code Climate issues](https://img.shields.io/codeclimate/issues/brightdigit/AviaryInsights)](https://codeclimate.com/github/brightdigit/AviaryInsights)
-[![Reviewed by Hound](https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg)](https://houndci.com)
 
 Table of Contents
 =================
@@ -30,6 +24,7 @@ Table of Contents
   * [Sending an Event](#sending-an-event)
     * [Asynchronous Throwing Method](#asynchronous-throwing-method)
     * [Synchronous Method](#synchronous-method)
+    * [Optional Request Headers](#optional-request-headers)
   * [Diagnostics](#diagnostics)
 * [License](#license)
    
@@ -41,6 +36,8 @@ Plausible provides simple and meaningful insights into your website's traffic wi
 - **Revenue tracking** Track revenue data associated with events.
 - **Plausible API integration** Send your events to the Plausible API for further analysis.
 - **Discard diagnostics** Observe HTTP status and `x-plausible-dropped` so you can tell when Plausible accepted vs discarded an event.
+- **Error handling** Route fire-and-forget delivery failures through an `onError` handler (defaults to printing).
+- **Attribution overrides** Supply the visitor's `IPAddress` and ask Plausible to echo back the address it counted.
 
 ## Requirements 
 
@@ -144,7 +141,46 @@ This method sends an event to the Plausible API in the background and ignores an
 plausible.postEvent(event)
 ```
 
+Delivery failures are reported to the `onError` handler you pass at initialization. It defaults to `Plausible.defaultErrorHandler`, which prints the error's description — the behavior this method has always had. Supply your own to route failures into a logger or metric, or `{ _ in }` to silence them entirely:
+
+```swift
+let plausible = Plausible(
+  defaultDomain: "com.example.yourApp",
+  userAgent: "MyApp/1.0 (com.example.yourApp)",
+  onError: { error in
+    logger.error("Plausible delivery failed: \(error)")
+  }
+)
+```
+
+Errors arrive wrapped in an `OpenAPIRuntime.ClientError`; its `underlyingError` is the transport failure. When a caller needs to react to the outcome inline, use the throwing `async` method instead.
+
 In both cases, `event` is an instance of `Event` that you want to send to the Plausible API.
+
+#### Optional Request Headers
+
+Both methods accept two optional headers the [Plausible events API](https://plausible.io/docs/events-api) supports:
+
+- **`forwardedFor`** overrides the client IP addresses Plausible attributes the event to (`X-Forwarded-For`). Pass an array of `IPAddress` values; they are joined with commas and Plausible uses the first valid one.
+- **`debugRequest`** asks Plausible to answer `200` with the IP address it used for visitor counting, instead of the usual `202` (`X-Debug-Request`).
+
+`IPAddress` is a byte-backed value type that parses IPv4 dotted-quad and IPv6 (RFC 4291, including `::` compression and an embedded IPv4 tail) and renders back the RFC 5952 canonical form. It has no string-literal conformance, so parsing is explicit and failable:
+
+```swift
+guard let address = IPAddress("203.0.113.7") else { return }
+
+try await plausible.postEvent(
+  event,
+  forwardedFor: [address],
+  debugRequest: true
+)
+```
+
+You can also build one without parsing: `IPAddress(203, 0, 113, 7)`, `IPAddress(bytes:)`, `IPAddress(groups:)`, or the constants `.loopback`, `.unspecified`, `.broadcast`, `.ipv6Loopback` and `.ipv6Unspecified`.
+
+Both parameters default to `nil`, in which case the header is not sent at all.
+
+> Note: the generated client percent-encodes header values, so `forwardedFor` currently reaches Plausible escaped whenever the value contains a reserved character — the `:` of an IPv6 address *and* the `,` joining a multi-address list (`203.0.113.7%2C198.51.100.42`). Until that is resolved, pass a single IPv4 address.
 
 ### Diagnostics
 

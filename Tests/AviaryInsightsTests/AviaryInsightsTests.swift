@@ -3,7 +3,7 @@
 //  AviaryInsights
 //
 //  Created by Leo Dion.
-//  Copyright © 2025 BrightDigit.
+//  Copyright © 2026 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,70 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import Testing
 
-@testable import AviaryInsights
-
-internal struct AviaryInsightsTests {
-  internal static let isOpenAPIURLSessionAvailable = {
-    #if canImport(OpenAPIURLSession)
-      true
-    #else
-      false
-    #endif
-  }()
-
-  private let decoder = JSONDecoder()
-  private let encoder: JSONEncoder = {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.sortedKeys]
-    return encoder
-  }()
-
-  private func makeClient(defaultDomain: String) -> (MockTransport, Plausible) {
-    let transport = MockTransport {
-      .init(response: .init(status: .accepted), body: "{}")
-    }
-    let client = Plausible(
-      transport: transport,
-      defaultDomain: defaultDomain,
-      userAgent: UUID().uuidString
-    )
-    return (transport, client)
-  }
-
-  private func assert(
-    events: [Event],
-    requests: [MockTransport.Request],
-    defaultDomain: String
-  ) throws {
-    for (event, request) in zip(events, requests) {
-      let data = try #require(request.body)
-      let actualJSONPayload = try decoder.decode(
-        Operations.post_sol_event.Input.Body.jsonPayload.self,
-        from: data
-      )
-      let expectedJSONPayload = Operations.post_sol_event.Input.Body.jsonPayload(
-        event: event,
-        defaultDomain: defaultDomain
-      )
-      let actualEncoded = try encoder.encode(actualJSONPayload)
-      let expectedEncoded = try encoder.encode(expectedJSONPayload)
-      #expect(actualEncoded == expectedEncoded)
-    }
-  }
-
-  @Test internal func postEvent() async throws {
-    let defaultDomain = UUID().uuidString
-    let (transport, client) = makeClient(defaultDomain: defaultDomain)
-    #if os(WASI)
-      let events = (0..<Int.random(in: 1...3)).map { _ in Event.random() }
-    #else
-      let events = (0..<Int.random(in: 10...20)).map { _ in Event.random() }
-    #endif
-    for event in events { try await client.postEvent(event) }
-    let requests = await transport.sentRequests
-    try assert(events: events, requests: requests, defaultDomain: defaultDomain)
-  }
-}
+/// Root suite for the AviaryInsights package.
+///
+/// The parent carries the `Tests` suffix and stays empty; every concern lives
+/// in an `AviaryInsightsTests+<Concern>.swift` extension that nests its own
+/// `@Suite` type, so the children report underneath this one.
+@Suite("AviaryInsights") internal enum AviaryInsightsTests {}

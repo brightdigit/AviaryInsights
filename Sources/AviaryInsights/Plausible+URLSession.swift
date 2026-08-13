@@ -43,18 +43,22 @@
     ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
     ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
     ///     Defaults to `nil` (no reporting).
+    ///   - onError: Handler receiving delivery failures from the fire-and-forget
+    ///     ``postEvent(_:)``. Defaults to ``Plausible/defaultErrorHandler``.
     public init(
       defaultDomain: String,
       userAgent: String,
       serverURL: URL = Self.defaultServerURL,
-      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
+      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil,
+      onError: @escaping @Sendable (any Error) -> Void = Plausible.defaultErrorHandler
     ) {
       self.init(
         transport: URLSessionTransport(),
         defaultDomain: defaultDomain,
         userAgent: userAgent,
         serverURL: serverURL,
-        diagnostics: diagnostics
+        diagnostics: diagnostics,
+        onError: onError
       )
     }
 
@@ -66,12 +70,15 @@
     ///   - configuration: Configuration for URLSessionTransport. Defaults to `nil`.
     ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
     ///     Defaults to `nil` (no reporting).
+    ///   - onError: Handler receiving delivery failures from the fire-and-forget
+    ///     ``postEvent(_:)``. Defaults to ``Plausible/defaultErrorHandler``.
     public init(
       defaultDomain: String,
       userAgent: String,
       serverURL: URL = Self.defaultServerURL,
       configuration: URLSessionTransport.Configuration,
-      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
+      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil,
+      onError: @escaping @Sendable (any Error) -> Void = Plausible.defaultErrorHandler
     ) {
       let transport: URLSessionTransport = .init(configuration: configuration)
       self.init(
@@ -79,7 +86,8 @@
         defaultDomain: defaultDomain,
         userAgent: userAgent,
         serverURL: serverURL,
-        diagnostics: diagnostics
+        diagnostics: diagnostics,
+        onError: onError
       )
     }
 
@@ -91,19 +99,23 @@
     ///   - serverURL: Server URL for the Plausible API. Defaults to `defaultServerURL`.
     ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``.
     ///     Defaults to `nil` (no reporting).
+    ///   - onError: Handler receiving delivery failures from the fire-and-forget
+    ///     ``postEvent(_:)``. Defaults to ``Plausible/defaultErrorHandler``.
     public init(
       session: URLSession,
       defaultDomain: String,
       userAgent: String,
       serverURL: URL = Self.defaultServerURL,
-      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
+      diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil,
+      onError: @escaping @Sendable (any Error) -> Void = Plausible.defaultErrorHandler
     ) {
       self.init(
         defaultDomain: defaultDomain,
         userAgent: userAgent,
         serverURL: serverURL,
         configuration: .init(session: session),
-        diagnostics: diagnostics
+        diagnostics: diagnostics,
+        onError: onError
       )
     }
   }

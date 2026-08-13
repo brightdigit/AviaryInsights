@@ -68,13 +68,14 @@ import OpenAPIRuntime
 ///
 /// ### Synchronous Method
 ///
-/// This method sends an event to the Plausible API in the background and ignores any errors that occur.
-/// This is useful when you don't need to handle errors and
-/// want to fire-and-forget the event. Here's an example:
+/// This method sends an event to the Plausible API in the background.
+/// Delivery failures go to the `onError` handler given at initialization
+/// (``defaultErrorHandler`` if none was, which prints). Here's an example:
 ///
 /// ```swift
 /// plausible.postEvent(event)
 /// ```
+/// Both methods also accept optional `forwardedFor` and `debugRequest` headers.
 /// In both cases, `event` is an instance of ``Event`` that you want to send to the Plausible API.
 public struct Plausible: Sendable {
   // swift-format-ignore: NeverUseForceTry
@@ -83,7 +84,20 @@ public struct Plausible: Sendable {
   public static let defaultServerURL = try! Servers.Server1.url()
   // swiftlint:enable force_try
 
+  /// Handler used when a caller does not supply one.
+  ///
+  /// Prints the error's description, preserving the behavior the
+  /// fire-and-forget `postEvent` had before the handler existed. Pass
+  /// your own to route failures into a logger or metric, or `{ _ in }` to
+  /// silence them.
+  public static let defaultErrorHandler: @Sendable (any Error) -> Void = { error in
+    print(error.localizedDescription)
+  }
+
   private let client: Client
+
+  /// Called when the fire-and-forget `postEvent` fails to deliver.
+  internal let onError: @Sendable (any Error) -> Void
 
   /// Default domain associated with the Plausible instance.
   public let defaultDomain: String
@@ -95,10 +109,16 @@ public struct Plausible: Sendable {
   /// for example `"MyApp/1.0 (com.example.myapp)"`.
   public let userAgent: String
 
-  private init(client: Client, defaultDomain: String, userAgent: String) {
+  private init(
+    client: Client,
+    defaultDomain: String,
+    userAgent: String,
+    onError: @escaping @Sendable (any Error) -> Void
+  ) {
     self.client = client
     self.defaultDomain = defaultDomain
     self.userAgent = userAgent
+    self.onError = onError
   }
 
   /// Initializes a Plausible instance with a custom `ClientTransport`.
@@ -110,12 +130,15 @@ public struct Plausible: Sendable {
   ///   - diagnostics: Handler receiving each response's ``PlausibleDiagnostics``
   ///     (status code and the `x-plausible-dropped` bot-filter marker). Defaults
   ///     to `nil` (no reporting).
+  ///   - onError: Handler receiving delivery failures from the fire-and-forget
+  ///     `postEvent`. Defaults to ``defaultErrorHandler``, which prints.
   public init(
     transport: any ClientTransport,
     defaultDomain: String,
     userAgent: String,
     serverURL: URL = Self.defaultServerURL,
-    diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil
+    diagnostics: (@Sendable (PlausibleDiagnostics) -> Void)? = nil,
+    onError: @escaping @Sendable (any Error) -> Void = Self.defaultErrorHandler
   ) {
     let middlewares = diagnostics.map {
       [DiagnosticsMiddleware(handler: $0)] as [any ClientMiddleware]
@@ -125,14 +148,34 @@ public struct Plausible: Sendable {
       transport: transport,
       middlewares: middlewares ?? []
     )
-    self.init(client: client, defaultDomain: defaultDomain, userAgent: userAgent)
+    self.init(
+      client: client,
+      defaultDomain: defaultDomain,
+      userAgent: userAgent,
+      onError: onError
+    )
   }
 
   /// Sends an event to the Plausible API.
-  /// - Parameter event: Event to be sent.
-  public func postEvent(_ event: Event) async throws {
+  /// - Parameters:
+  ///   - event: Event to be sent.
+  ///   - forwardedFor: Overrides the client IP addresses Plausible attributes
+  ///     the event to (`X-Forwarded-For`). Serialized as a comma-separated
+  ///     list; Plausible uses the first valid address. Supports IPv4 and IPv6.
+  ///   - debugRequest: When `true`, asks Plausible to answer `200` with the IP
+  ///     address it used for visitor counting (`X-Debug-Request`), instead of
+  ///     the usual `202`.
+  public func postEvent(
+    _ event: Event,
+    forwardedFor: [IPAddress]? = nil,
+    debugRequest: Bool? = nil
+  ) async throws {
     let output = try await client.post_sol_event(
-      headers: .init(User_hyphen_Agent: userAgent),
+      headers: .init(
+        User_hyphen_Agent: userAgent,
+        X_hyphen_Forwarded_hyphen_For: forwardedFor?.map(\.description).joined(separator: ","),
+        X_hyphen_Debug_hyphen_Request: debugRequest
+      ),
       body: .init(event: event, defaultDomain: defaultDomain)
     )
     switch output {

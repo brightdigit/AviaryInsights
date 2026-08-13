@@ -1,9 +1,9 @@
 //
-//  Plausible+PostEvent.swift
+//  Revenue+TestHelpers.swift
 //  AviaryInsights
 //
 //  Created by Leo Dion.
-//  Copyright © 2026 BrightDigit.
+//  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,34 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-extension Plausible {
-  /// Sends the event to Plausible in the background.
-  ///
-  /// Delivery failures go to the `onError` handler given at initialization —
-  /// ``Plausible/defaultErrorHandler`` if none was, which prints. Use the
-  /// throwing `async` `postEvent` instead when the caller needs to react to
-  /// the failure inline.
-  /// - Parameters:
-  ///   - event: An analytic event to record.
-  ///   - forwardedFor: Client IP addresses Plausible attributes the event to
-  ///     (`X-Forwarded-For`). Plausible uses the first valid address.
-  ///   - debugRequest: When `true`, asks Plausible to answer `200` with the IP
-  ///     address it used for visitor counting (`X-Debug-Request`).
-  public func postEvent(
-    _ event: Event,
-    forwardedFor: [IPAddress]? = nil,
-    debugRequest: Bool? = nil
-  ) {
-    Task {
-      do {
-        try await postEvent(
-          event,
-          forwardedFor: forwardedFor,
-          debugRequest: debugRequest
-        )
-      } catch {
-        onError(error)
-      }
-    }
+import AviaryInsights
+import Foundation
+
+extension Revenue {
+  internal static func random() -> Revenue {
+    .init(currency: UUID().uuidString, amount: .random(in: 20...999))
   }
 }
