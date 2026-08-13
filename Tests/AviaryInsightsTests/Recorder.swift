@@ -1,5 +1,5 @@
 //
-//  ErrorRecorder.swift
+//  Recorder.swift
 //  AviaryInsights
 //
 //  Created by Leo Dion.
@@ -28,46 +28,44 @@
 //
 
 import Foundation
-import OpenAPIRuntime
 
-/// Collects every error handed to a `Plausible` `onError` handler.
+/// Collects every value handed to a reporting callback under test.
 ///
-/// The handler is a synchronous `@Sendable` closure, so it cannot `await` an
-/// actor. A lock is the portable way to read the captured errors back.
-internal final class ErrorRecorder: @unchecked Sendable {
+/// Both `diagnostics` and `onError` are synchronous `@Sendable` closures, so
+/// neither can `await` an actor. A lock is the portable way to make what they
+/// captured readable from the test that installed them, and one generic
+/// recorder keeps the two call sites from growing near-identical copies.
+internal final class Recorder<Value>: @unchecked Sendable {
   private let lock = NSLock()
-  private var storage: [any Error] = []
+  private var storage: [Value] = []
 
   /// Everything recorded so far, oldest first.
-  internal var received: [any Error] {
+  internal var received: [Value] {
     lock.lock()
     defer { lock.unlock() }
     return storage
   }
 
-  /// The transport failure underneath the `ClientError` the generated client
-  /// wraps every transport error in.
-  internal static func underlyingError(of error: any Error) -> (any Error)? {
-    (error as? ClientError)?.underlyingError
-  }
-
-  /// A handler to pass as `Plausible.init(onError:)`.
-  internal func handler() -> @Sendable (any Error) -> Void {
-    { error in
+  /// A handler to hand to `Plausible` at initialization.
+  ///
+  /// - Returns: A closure appending each value it is called with.
+  internal func handler() -> @Sendable (Value) -> Void {
+    { value in
       self.lock.lock()
       defer { self.lock.unlock() }
-      self.storage.append(error)
+      self.storage.append(value)
     }
   }
 
-  /// Waits for at least one error.
+  /// Waits for at least one recorded value.
   ///
   /// The fire-and-forget `postEvent` reports from a `Task` that outlives the
   /// call. Gives up after `attempts` 10ms polls so a regression fails an
   /// assertion rather than hanging.
   /// - Parameter attempts: Polls before giving up. Use a small value when
   ///   asserting that nothing arrives.
-  internal func waitForError(attempts: Int = 100) async throws -> (any Error)? {
+  /// - Returns: The first value recorded, or `nil` if none arrived.
+  internal func waitForValue(attempts: Int = 100) async throws -> Value? {
     for _ in 0..<attempts where received.isEmpty {
       try await Task.sleep(nanoseconds: 10_000_000)
     }
